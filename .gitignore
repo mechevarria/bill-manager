@@ -10,3 +10,4 @@ target
 *.war
 *.sublime-*
 *.swp
+*.original
