@@ -1,0 +1,68 @@
+<!-- add -->
+<div ng-controller="AddCtrl" collapse="hideAdd" ng-include="'app/bill/add/add.tpl.html'">
+</div>
+
+<!-- edit -->
+<div ng-controller="EditCtrl" collapse="hideEdit" ng-include="'app/bill/edit/edit.tpl.html'">
+</div>
+
+<!-- list -->
+<div class="panel panel-default" collapse="hideList">
+    <div class="panel-heading">List of all Bills</div>
+    <div class="panel-body">
+        <table class="table" st-table="bills" st-pipe="updateTable">
+            <thead>
+                <tr>
+                    <th colspan="5">
+                        <div class="form-inline">
+                            <button ng-click="doAdd()" type="button" class="btn btn-primary" ng-disabled="showAdd">
+                                <i class="fa fa-plus"></i> Add
+                            </button>
+                            <!--
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-filter"></i>
+                                </div>
+                                <input st-search="" class="form-control" placeholder="filter ..." type="text" />
+                            </div>
+                            -->
+                        </div>
+                    </th>
+                </tr>
+                <tr>
+                    <th>Action</th>
+                    <th st-sort-default="reverse" st-sort="billDate">Month - Year</th>
+                    <th st-sort="totalExpense">Expense</th>
+                    <th st-sort="totalIncome">Income</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="bill in bills">
+                    <td>
+                        <button ng-click="doEdit(bill.id)" type="button" class="btn btn-primary">
+                            <i class="fa fa-pencil"></i> Edit
+                        </button>
+                        <button ng-click="doConfirm(bill)" type="button" class="btn btn-warning">
+                            <i class="fa fa-remove"></i> Delete
+                        </button>
+                    </td>
+                    <td>
+                        <p class="form-control-static">{{bill.billDate | date : 'MMMM - yyyy'}}</p>
+                    </td>
+                    <td>
+                        <p class="form-control-static">{{bill.totalExpense | currency}}</p>
+                    </td>
+                    <td>
+                        <p class="form-control-static">{{bill.totalIncome | currency}}</p>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div st-pagination="" st-items-by-page="10" st-displayed-pages="50"></div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,100 @@
+<br>
+<div collapse="!hideRemove">
+    <p>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Number of detailed entries is {{details.length}}
+            </div>
+        </div>
+    </p>
+    <p>
+        <table class="table" st-table="displayedDetails" st-safe-src="details" ng-if="!hideDetails">
+            <thead>
+                <tr>
+                    <th colspan="6">
+                        <div class="form-inline">
+                            <div class="form-group">
+                                <span class="btn btn-primary btn-file">
+                                    <i class="fa fa-upload"></i> Import <input type="file" on-read-file="doImport($fileContent)"/>
+                                </span>
+                                <button type="button" class="btn btn-default" ng-click="hideDetail()">
+                                    <i class="fa fa-level-up"></i> Back
+                                </button>
+                                <button type="button" class="btn btn-default" ng-click="addDetail()">
+                                    <i class="fa fa-plus"></i> Add
+                                </button>
+                                <button type="button" class="btn btn-warning" ng-click="removeAll()">
+                                    <i class="fa fa-eraser"></i> Clear
+                                </button>
+                                <div class="input-group">
+                                    <div class="input-group-addon"><i class="fa fa-filter"></i>
+                                    </div>
+                                    <input st-search="" class="form-control" placeholder="filter ..." type="text" />
+                                </div>
+                            </div>
+                            <div class="form-group pull-right">
+                                <label class="control-label">Items per page</label>
+                                <select class="form-control"
+                                        ng-model="pageSize"
+                                        ng-options="pageSize as pageSize for pageSize in sizes">
+                                </select>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+                <tr>
+                    <th>Action</th>
+                    <th st-sort="date">Date</th>
+                    <th st-sort="type">Type</th>
+                    <th st-sort="description">Description</th>
+                    <th st-sort="amount">Amount</th>
+                    <th>Personal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="detail in displayedDetails" ng-class="getColor(detail.personal)">
+                    <td>
+                        <button type="button" class="btn btn-default" ng-click="deleteDetail(detail)">
+                            <i class="fa fa-remove"></i> Delete
+                        </button>
+                    </td>
+                    <td>
+                        <ng-form name="innerForm">
+                            <div ng-class="{ 'has-error': innerForm.date.$invalid }">
+                                <input type="text" class="form-control" name="date" ng-model="detail.date" ng-pattern="/^[0,1]?\d{1}\/(([0-2]?\d{1})|([3][0,1]{1}))\/(([1]{1}[9]{1}[9]{1}\d{1})|([2-9]{1}\d{3}))$/" required>
+                            </div>
+                        </ng-form>
+                    </td>
+                    <td>
+                        <textarea class="form-control" ng-model="detail.type"></textarea>
+                    </td>
+                    <td>
+                        <textarea class="form-control" ng-model="detail.description"></textarea>
+                    </td>
+                    <td>
+                        <ng-form name="innerForm2">
+                            <div ng-class="{ 'has-error': innerForm2.amount.$invalid }">
+                                <div class="input-group">
+                                    <div class="input-group-addon"><i class="fa fa-usd"></i>
+                                    </div>
+                                    <input type="number" class="form-control" name="amount" ng-model="detail.amount" ng-change="update()" ng-pattern="/^-?\d{0,9}(\.\d{1,9})?$/" required>
+                                </div>
+                            </div>
+                        </ng-form>
+                    </td>
+                    <td>
+                        <select class="form-control" ng-model="detail.personal" ng-change="update()" ng-options="owner.name as owner.label for owner in paidList">
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div st-pagination="" st-items-by-page="pageSize" st-displayed-pages="15"></div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </p>
+</div>

@@ -1,0 +1,141 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Data Management</div>
+    <div class="panel-body">
+        <button class="btn btn-default" type="button" ng-click="doExport()"><i class="fa fa-download"></i> Export</button>
+        <button class="btn btn-default" type="button" ng-click="doImport()"><i class="fa fa-upload"></i> Import</button>
+        <button class="btn btn-warning" type="button" ng-click="confirmErase()"><i class="fa fa-trash-o"></i> Erase</button>
+    </div>
+</div>
+<form role="form" novalidate name="defaults" ng-submit="doUpdate(defaults.$valid, toEdit)">
+    <div class="panel panel-default">
+        <div class="panel-heading" id="defaults-heading">Defaults When Adding New</div>
+        <div class="panel-body">
+            <tabset>
+                <tab heading="Owners" class="tabs" id="owner-tab">
+                    <div class="row">
+                        <div class="col-md-6" ng-repeat="owner in toEdit.owners">
+                            <ng-form name="innerForm">
+                                <div class="form-group" ng-class="{ 'has-error': innerForm.owner.$invalid }">
+                                    <label class="control-label" for="owner">{{owner.name}}</label>
+                                    <input type="text" class="form-control" ng-model="owner.label" name="owner" required>
+                                </div>
+                            </ng-form>
+                            <div class="form-group">
+                                <label class="control-label" for="owner-color">{{owner.name}} Color</label>
+                                <select class="form-control" ng-model="owner.color" name="owner-color" ng-options="color.value as color.label for color in colors">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </tab>
+                <tab heading="Income" class="tabs" id="income-tab">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th colspan="4">
+                                    <div class="form-inline">
+                                        <div class="form-group">
+                                            <button type="button" ng-click="addIncome()" class="btn btn-primary">
+                                                <i class="fa fa-plus"></i> Add Income
+                                            </button>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Action</th>
+                                <th>Owner</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="income in toEdit.incomes" ng-class="getColor(income.owner)">
+                                <td>
+                                    <button ng-click="deleteIncome(income)" type="button" class="btn btn-default">
+                                        <i class="fa fa-remove"></i> Delete
+                                    </button>
+                                </td>
+                                <td>
+                                    <select class="form-control" ng-model="income.owner" ng-options="owner.name as owner.label for owner in toEdit.owners">
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" ng-model="income.description">
+                                </td>
+                                <td>
+                                    <ng-form name="innerForm">
+                                        <div ng-class="{ 'has-error': innerForm.amount.$invalid }">
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><i class="fa fa-usd"></i>
+                                                </div>
+                                                <input type="number" class="form-control" name="amount" ng-model="income.amount" ng-pattern="/^\d{0,9}(\.\d{1,9})?$/" required>
+                                            </div>
+                                        </div>
+                                    </ng-form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </tab>
+                <tab heading="Expenses" class="tabs" id="expense-tab">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th colspan="4">
+                                    <button ng-click="addExpense()" type="button" class="btn btn-primary">
+                                        <i class="fa fa-plus"></i> Add Expense
+                                    </button>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Action</th>
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Paid By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="expense in toEdit.expenses" ng-class="getColor(expense.paid)">
+                                <td>
+                                    <button ng-click="deleteExpense(expense)" type="button" class="btn btn-default">
+                                        <i class="fa fa-remove"></i> Delete
+                                    </button>
+                                    <button ng-click="expense.hasDetails = !expense.hasDetails" type="button" class="btn btn-default">
+                                        <i ng-class="getIcon(expense.hasDetails)"></i> Details
+                                    </button>
+                                </td>
+                                <td>
+                                    <ng-form name="innerForm">
+                                        <div ng-class="{ 'has-error': innerForm.ename.$invalid }">
+                                            <input type="text" class="form-control" name="ename" ng-model="expense.name" required>
+                                        </div>
+                                    </ng-form>
+                                </td>
+                                <td>
+                                    <ng-form name="innerForm2">
+                                        <div ng-class="{ 'has-error': innerForm2.amount.$invalid }">
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><i class="fa fa-usd"></i>
+                                                </div>
+                                                <input type="number" class="form-control" name="amount" ng-model="expense.amount" ng-pattern="/^\d{0,9}(\.\d{1,9})?$/" required>
+                                            </div>
+                                        </div>
+                                    </ng-form>
+                                </td>
+                                <td>
+                                    <select class="form-control" ng-model="expense.paid" ng-options="owner.name as owner.label for owner in toEdit.owners">
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </tab>
+            </tabset>
+            <button type="submit" class="btn btn-success" ng-disabled="defaults.$invalid">
+                <i class="fa fa-check"></i> Update
+            </button>
+            <a href="#/" class="btn btn-default" role="button"><i class="fa fa-remove"></i> Cancel</a>
+        </div>
+    </div>
+</form>

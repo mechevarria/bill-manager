@@ -1,0 +1,32 @@
+<div class="row">
+    <div class="container">
+        <form class="form form-inline">
+            <label>Year</label>&nbsp;
+            <select class="form-control" ng-options="year.label for year in years" ng-model="selectedYear" ng-change="filterYear()">
+            </select>
+        </form>
+    </div>
+</div>
+<br>
+<div class="row">
+    <div class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">Expense/Income</div>
+            <div class="panel-body">
+                <p>
+                    <highchart id="expenseIncome" config="expenseIncome"></highchart>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Sum of Income/Expense</div>
+            <div class="panel-body">
+                <p>
+                    <highchart id="sumTotal" config="sumTotal"></highchart>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

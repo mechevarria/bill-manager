@@ -1,0 +1,220 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Editing {{toEdit.month}} - {{toEdit.year}}</div>
+    <div class="panel-body">
+        <form role="form" novalidate name="billForm" ng-submit="doSave(billForm.$valid, toEdit)">
+            <tabset>
+                <tab heading="Summary" class="tabs">
+                    <p>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                {{toEdit.settlement}}
+                            </div>
+                        </div>
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table">
+                                <thead>
+                                    <th></th>
+                                    <th ng-class="getColor(defaults.owners[0].name)">{{defaults.owners[0].label}}</th>
+                                    <th ng-class="getColor(defaults.owners[1].name)">{{defaults.owners[1].label}}</th>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>+ Need to Pay (Personal + Shared)</th>
+                                        <td ng-class="getColor(defaults.owners[0].name)">{{toEdit.owner1Personal + toEdit.owner1Shared | currency}}</td>
+                                        <td ng-class="getColor(defaults.owners[1].name)">{{toEdit.owner2Personal + toEdit.owner2Shared | currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>- Paid Expenses</th>
+                                        <td ng-class="getColor(defaults.owners[0].name)">{{toEdit.owner1Paid | currency}}</td>
+                                        <td ng-class="getColor(defaults.owners[1].name)">{{toEdit.owner2Paid | currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>= Total</th>
+                                        <td class="{{getColor(defaults.owners[0].name)}}" ng-class="{ 'text-danger' : toEdit.owner1Owe < 0 }">{{toEdit.owner1Owe | currency}}</td>
+                                        <td class="{{getColor(defaults.owners[1].name)}}" ng-class="{ 'text-danger' : toEdit.owner2Owe < 0 }">{{toEdit.owner2Owe | currency}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th ng-class="getColor(defaults.owners[0].name)">{{defaults.owners[0].label}}</th>
+                                        <th ng-class="getColor(defaults.owners[1].name)">{{defaults.owners[1].label}}</th>
+                                        <th>{{defaults.owners[0].label}} &amp; {{defaults.owners[1].label}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>+ Income</th>
+                                        <td ng-class="getColor(defaults.owners[0].name)">{{toEdit.owner1Income | currency}}</td>
+                                        <td ng-class="getColor(defaults.owners[1].name)">{{toEdit.owner2Income | currency}}</td>
+                                        <td>{{toEdit.totalIncome | currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>- Personal Expense</th>
+                                        <td ng-class="getColor(defaults.owners[0].name)">{{toEdit.owner1Personal | currency}}</td>
+                                        <td ng-class="getColor(defaults.owners[1].name)">{{toEdit.owner2Personal | currency}}</td>
+                                        <td>{{toEdit.totalPersonal | currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>- Shared Expense</th>
+                                        <td ng-class="getColor(defaults.owners[0].name)">{{toEdit.owner1Shared | currency}}</td>
+                                        <td ng-class="getColor(defaults.owners[1].name)">{{toEdit.owner2Shared | currency}}</td>
+                                        <td>{{toEdit.totalShared | currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>= Net</th>
+                                        <td class="{{getColor(defaults.owners[0].name)}}" ng-class="{ 'text-danger' : toEdit.total < 0 }">{{toEdit.owner1Total | currency}}</td>
+                                        <td class="{{getColor(defaults.owners[1].name)}}" ng-class="{ 'text-danger' : toEdit.total < 0 }">{{toEdit.owner2Total | currency}}</td>
+                                        <td>{{toEdit.total | currency}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </tab>
+                <tab heading="Income" class="tabs">
+                    <p>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                {{incomeDiff}}
+                            </div>
+                        </div>
+                    </p>
+                    <p>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4">
+                                        <button type="button" ng-click="addIncome()" class="btn btn-primary">
+                                            <i class="fa fa-plus"></i> Add Income
+                                        </button>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Owner</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="income in toEdit.incomes" ng-class="getColor(income.owner)">
+                                    <td>
+                                        <button ng-click="deleteIncome(income)" type="button" class="btn btn-default">
+                                            <i class="fa fa-remove"></i> Delete
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <select class="form-control" ng-model="income.owner" ng-options="owner.name as owner.label for owner in defaults.owners" ng-change="update()">
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="income.description">
+                                    </td>
+                                    <td>
+                                        <ng-form name="innerForm">
+                                            <div ng-class="{ 'has-error': innerForm.amount.$invalid }">
+                                                <div class="input-group">
+                                                    <div class="input-group-addon"><i class="fa fa-usd"></i>
+                                                    </div>
+                                                    <input type="number" name="amount" class="form-control" ng-model="income.amount" ng-change="update()" ng-pattern="/^-?\d{0,9}(\.\d{1,9})?$/" required>
+                                                </div>
+                                            </div>
+                                        </ng-form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </p>
+                </tab>
+                <tab heading="Expenses" class="tabs">
+                    <div ng-show="hideDetails">
+                        <p>
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    Total expenses are {{toEdit.totalExpense | currency}}
+                                </div>
+                            </div>
+                        </p>
+                        <p>
+                            <table class="table" st-table="displayedExpenses" st-safe-src="toEdit.expenses">
+                                <thead>
+                                    <tr>
+                                        <th colspan="4">
+                                            <div class="form-inline">
+                                                <button ng-click="addExpense()" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-plus"></i> Add Expense
+                                                </button>
+                                                <div class="input-group">
+                                                    <div class="input-group-addon"><i class="fa fa-filter"></i>
+                                                    </div>
+                                                    <input st-search="" class="form-control" placeholder="filter ..." type="text" />
+                                                </div>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th st-sort="name">Name</th>
+                                        <th st-sort="amount">Amount</th>
+                                        <th st-sort="paid">Paid By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="expense in displayedExpenses" ng-class="getColor(expense.paid)">
+                                        <td>
+                                            <button ng-click="deleteExpense(expense)" type="button" class="btn btn-default">
+                                                <i class="fa fa-remove"></i> Delete
+                                            </button>
+                                            <button type="button" class="btn btn-default" ng-if="!expense.hasDetails" ng-click="addDetails(expense)">
+                                                <i class="fa fa-plus"></i> Details
+                                            </button>
+                                            <button type="button" class="btn btn-primary" ng-if="expense.hasDetails" ng-click="editDetails(expense.details)">
+                                                <i class="fa fa-level-down"></i> Details
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <ng-form name="innerForm">
+                                                <div ng-class="{ 'has-error': innerForm.ename.$invalid }">
+                                                    <input type="text" class="form-control" name="ename" ng-model="expense.name" required>
+                                                </div>
+                                            </ng-form>
+                                        </td>
+                                        <td>
+                                            <ng-form name="innerForm2">
+                                                <div ng-class="{ 'has-error': innerForm2.amount.$invalid }">
+                                                    <div class="input-group">
+                                                        <div class="input-group-addon"><i class="fa fa-usd"></i>
+                                                        </div>
+                                                        <input type="number" name="amount" class="form-control" ng-change="update()" ng-model="expense.amount" ng-readonly="expense.hasDetails" ng-pattern="/^-?\d{0,9}(\.\d{1,9})?$/" required>
+                                                    </div>
+                                                </div>
+                                            </ng-form>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="expense.paid" ng-options="owner.name as owner.label for owner in defaults.owners">
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </p>
+                    </div>
+                    <!-- details -->
+                    <div collapse="hideDetails" ng-controller="DetailsCtrl" ng-include="'app/bill/edit/details/details.tpl.html'">
+                    </div>
+                </tab>
+            </tabset>
+            <button type="submit" class="btn btn-success" ng-disabled="billForm.$invalid">
+                <i class="fa fa-check"></i> Update
+            </button>
+            <button type="button" class="btn btn-default" ng-click="doCancel()"><i class="fa fa-remove"></i> Cancel</button>
+        </form>
+    </div>
+</div>

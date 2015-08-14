@@ -1,0 +1,51 @@
+<dataConfig>
+    <dataSource driver="org.h2.Driver" url="jdbc:h2:~/Documents/billDb;TRACE_LEVEL_FILE=0;AUTO_SERVER=TRUE" user="sa"/>
+    <document>
+        <entity name="income" query="
+select
+i.id as db_id,
+i.income_date as item_date,
+o.label as author,
+i.description,
+i.amount as price,
+i.last_updated as last_modified,
+'income' as category
+from income i, owner o
+where i.owner = o.name
+and ('${dataimporter.request.clean}' != 'false'
+or i.last_updated > '${dataimporter.last_index_time}')
+">
+        </entity>
+        <entity name="expense" query="
+select
+e.id as db_id,
+e.expense_date as item_date,
+o.label as author,
+e.name as description,
+e.amount as price,
+e.last_updated as last_modified,
+'expense' as category
+from expense e, owner o
+where e.paid = o.name
+and ('${dataimporter.request.clean}' != 'false'
+or e.last_updated > '${dataimporter.last_index_time}')
+">
+        </entity>
+        <entity name="detail" query="
+select
+d.id as db_id,
+d.detail_date as item_date,
+o.label as author,
+d.description,
+d.amount as price,
+d.last_updated as last_modified,
+'detail' as category
+from detail d
+left join owner o
+on d.personal = o.name
+where '${dataimporter.request.clean}' != 'false'
+or d.last_updated > '${dataimporter.last_index_time}'
+">
+        </entity>
+    </document>
+</dataConfig>

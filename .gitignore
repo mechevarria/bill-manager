@@ -1,0 +1,12 @@
+build
+.gradle
+node_modules
+dist
+.tmp
+.sass-cache
+bower_components
+target
+.idea
+*.war
+*.sublime-*
+*.swp

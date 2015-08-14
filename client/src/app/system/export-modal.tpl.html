@@ -1,0 +1,16 @@
+<div class="modal-body">
+    <p>
+        <progressbar max="total" value="processed"><span>{{processed}} / {{total}}</span></progressbar>
+    </p>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-disabled="{{ 'isFinished()' }}" ng-click="prepare()">
+        <i class="fa fa-gears"></i> Prepare
+    </button>
+    <a class="btn btn-primary" ng-disabled="{{ 'notFinished()' }}" ng-click="download()" ng-href="{{ url }}" download="export.json">
+        <i class="fa fa-download"></i> Download
+    </a>
+    <button class="btn btn-default" ng-click="cancel()">
+        <i class="fa fa-remove"></i> Cancel
+    </button>
+</div>

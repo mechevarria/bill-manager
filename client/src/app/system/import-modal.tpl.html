@@ -1,0 +1,12 @@
+<div class="modal-body">
+    <p>
+        <progressbar max="total" value="processed"><span>{{processed}} / {{total}}</span></progressbar>
+    </p>
+</div>
+<div class="modal-footer">
+    <span class="btn btn-primary btn-file">
+            <i class="fa fa-upload"></i> Load File<input type="file" on-read-file="load($fileContent)"/>
+    </span>
+    <button class="btn btn-primary" ng-click="process()" ng-disabled="notReady"><i class="fa fa-gears"></i> Process</button>
+    <button class="btn btn-default" ng-click="cancel()"><i class="fa fa-remove"></i> Close</button>
+</div>

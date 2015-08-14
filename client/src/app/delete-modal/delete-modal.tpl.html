@@ -1,0 +1,8 @@
+<div class="modal-body">
+    <p>Are you sure you want to remove {{details}}?</p>
+</div>
+<div class="modal-footer">
+	<span ng-if="showUpdate" class="pull-left text-muted">The <span class="label label-success">Update</span> button will save this change</span>
+    <button class="btn btn-warning" ng-click="ok(item)"><i class="fa fa-trash-o"></i> Yes</button>
+    <button class="btn btn-default" ng-click="cancel()"><i class="fa fa-remove"></i> No</button>
+</div>
