@@ -9,22 +9,8 @@ class BillController {
 
     private static final log = LogFactory.getLog(this)
 
-    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
-
     def index() {
-        def size = params.size
-        def start = params.start
-        def sort = params.sort
-        def order = params.order
-
-        def bills
-        if (size && start && sort && order) {
-            log.info "listing bills with max $size, offset $start, sort $sort, order $order"
-            bills = Bill.list(max: size, offset: start, sort: sort, order: order)
-        } else {
-            log.info "listing all bills"
-            bills = Bill.list()
-        }
+        def bills = Bill.list(max: params.size, offset: params.start, sort: params.sort, order: params.order)
         def count = Bill.count()
 
         def results = [
@@ -32,13 +18,13 @@ class BillController {
                 "count": count
         ]
 
-        render(status: 200, text: results as JSON, contentType: "application/json", encoding: "UTF-8")
+        render results as JSON
     }
 
     def ids() {
         def ids = Bill.executeQuery("select b.id from Bill b")
 
-        render(status: 200, text: ids as JSON, contentType: "application/json", encoding: "UTF-8")
+        render ids as JSON
     }
 
     def get() {
@@ -46,9 +32,9 @@ class BillController {
 
         try {
             JSON.use("deep")
-            render(status: 200, text: Bill.findById(params.id) as JSON, contentType: "application/json", encoding: "UTF-8")
+            render Bill.findById(params.id) as JSON
         } catch (Exception ex) {
-            render(status: 400, text: ex.message, contentType: "text/HTML", encoding: "UTF-8")
+            render(status: 500, text: ex.message)
         }
     }
 
@@ -93,12 +79,12 @@ class BillController {
                 throw new Exception(message)
             }
 
-            bill.save flush: true
+            bill.save(flush: true)
 
             JSON.use("deep")
-            render(status: 200, text: bill as JSON, contentType: "application/json", encoding: "UTF-8")
+            render bill as JSON
         } catch (Exception ex) {
-            render(status: 400, text: ex.message, contentType: "text/HTML", encoding: "UTF-8")
+            render(status: 500, text: ex.message)
         }
     }
 
@@ -112,15 +98,15 @@ class BillController {
         log.info "deleting bill with id=$params.id"
 
         try {
-            def billInstance = Bill.findById(params.id)
+            def bill = Bill.findById(params.id)
 
-            def message = ["msg": "$billInstance.month - $billInstance.year successfully deleted"]
+            def message = "$bill.month - $bill.year successfully deleted"
 
-            billInstance.delete flush: true
+            bill.delete(flush: true)
 
-            render(status: 200, text: message as JSON, contentType: "application/json", encoding: "UTF-8")
+            render(status: 200, text: message)
         } catch (Exception ex) {
-            render(status: 400, text: ex.message, contentType: "text/HTML", encoding: "UTF-8")
+            render(status: 500, text: ex.message)
         }
     }
 }
