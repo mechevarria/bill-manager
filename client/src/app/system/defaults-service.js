@@ -18,11 +18,10 @@ app.factory('DefaultsSrvc', function($q, $http) {
 
             deferred.resolve(response);
         }).
-        error(function(data) {
+        error(function(msg) {
         	response = {
-                data: data,
-                type: 'danger',
-                msg: 'Defaults failed to update'
+                type: 'error',
+                msg: msg
             };
 
             deferred.resolve(response);
@@ -33,7 +32,7 @@ app.factory('DefaultsSrvc', function($q, $http) {
     factory.get = function() {
         var deferred = $q.defer();
 
-        $http.get(resource + 'index.json').success(function(data) {
+        $http.get(resource + 'index').success(function(data) {
             deferred.resolve(data);
         });
 

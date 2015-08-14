@@ -7,7 +7,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.getAllBills = function () {
     var deferred = $q.defer();
 
-    $http.get(resource + 'index.json').success(function (data) {
+    $http.get(resource + 'index').success(function (data) {
       deferred.resolve(data);
     });
 
@@ -17,7 +17,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.getBills = function (offset, max, sort, order) {
     var deferred = $q.defer();
 
-    var url = resource + 'index.json';
+    var url = resource + 'index';
 
     var config = {
       params: {
@@ -45,7 +45,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.get = function (id) {
     var deferred = $q.defer();
 
-    $http.get(resource + 'get/' + id + '.json').
+    $http.get(resource + 'get/' + id).
       success(function (data) {
         deferred.resolve(data);
       }).
@@ -60,7 +60,7 @@ app.factory('BillSrvc', function ($http, $q) {
     var deferred = $q.defer();
     var response = {};
 
-    $http.post(resource + 'save.json', bill).
+    $http.post(resource + 'save', bill).
       success(function (data) {
         response = {
           data: data,
@@ -86,7 +86,7 @@ app.factory('BillSrvc', function ($http, $q) {
     var deferred = $q.defer();
     var response = {};
 
-    $http.put(resource + 'update.json', bill).
+    $http.put(resource + 'update', bill).
       success(function (data) {
         response = {
           data: data,
@@ -112,19 +112,19 @@ app.factory('BillSrvc', function ($http, $q) {
     var deferred = $q.defer();
     var response = {};
 
-    $http.delete(resource + 'delete/' + id + '.json').
-      success(function (data) {
+    $http.delete(resource + 'delete/' + id).
+      success(function (msg) {
         response = {
           type: 'success',
-          msg: data.msg
+          msg: msg
         };
 
         deferred.resolve(response);
       }).
-      error(function (data) {
+      error(function (msg) {
         response = {
           type: 'error',
-          msg: data
+          msg: msg
         };
 
         deferred.resolve(response);
@@ -136,7 +136,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.getIds = function () {
     var deferred = $q.defer();
 
-    $http.get(resource + 'ids.json').success(function (data) {
+    $http.get(resource + 'ids').success(function (data) {
       deferred.resolve(data);
     });
 
