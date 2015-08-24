@@ -1,8 +1,5 @@
 import api.Defaults
 import api.Owner
-import api.Bill
-import api.Expense
-import api.Detail
 
 class BootStrap {
 
