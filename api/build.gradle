@@ -39,7 +39,7 @@ assets {
 
 repositories {
     mavenLocal()
-    maven { url "https://repo.grails.org/grails/core" }
+    maven { url "http://repo.grails.org/grails/core" }
 }
 
 dependencyManagement {
@@ -63,8 +63,9 @@ dependencies {
     compile "org.grails.plugins:scaffolding"
 
     runtime "org.grails.plugins:asset-pipeline"
-    compile "com.h2database:h2:1.4.187"
 
+    // added dependencies
+    compile "com.h2database:h2:1.4.187"
 
     testCompile "org.grails:grails-plugin-testing"
     testCompile "org.grails.plugins:geb"
