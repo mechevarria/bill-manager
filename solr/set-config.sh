@@ -1,17 +1,17 @@
-CONF=$(pwd)/bills/conf
-LIB=/opt/solr/dist
-DB=~/git/bill-manager/db/*.jar
-SOLR_HOME=/var/solr/data/bills
-SOLR_CONF=$SOLR_HOME/conf
-SOLR_LIB=$SOLR_HOME/lib
+conf=$(pwd)/bills/conf
+lib=/opt/solr/dist
+db=*.jar
+solr_home=/var/solr/data/bills
+solr_conf=${solr_home}/conf
+solr_lib=${solr_home}/lib
 
-FILES=("data-config.xml" "managed-schema" "solrconfig.xml")
+files=("data-config.xml" "managed-schema" "solrconfig.xml")
 
-for FILE in "${FILES[@]}"; do
-  ln -sf $CONF/$FILE $SOLR_CONF
+for file in "${files[@]}"; do
+  ln -sf ${conf}/${file} ${solr_conf}
 done
 
-rm $SOLR_LIB/*.jar
-cp $LIB/solr-dataimporthandler-*.jar $SOLR_LIB
-cp $LIB/solr-dataimporthandler-extras-*.jar $SOLR_LIB
-cp $DB $SOLR_LIB
+rm ${solr_lib}/*.jar
+cp ${lib}/solr-dataimporthandler-*.jar ${solr_lib}
+cp ${lib}/solr-dataimporthandler-extras-*.jar ${solr_lib}
+cp ${db} ${solr_lib}

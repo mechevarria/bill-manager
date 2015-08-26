@@ -1,5 +1,5 @@
 <dataConfig>
-    <dataSource driver="org.h2.Driver" url="jdbc:h2:~/Documents/billDb;TRACE_LEVEL_FILE=0;AUTO_SERVER=TRUE" user="sa"/>
+    <dataSource driver="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/billDb" user="app" password="app"/>
     <document>
         <entity name="income" query="
 select
