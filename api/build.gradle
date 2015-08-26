@@ -65,7 +65,7 @@ dependencies {
     runtime "org.grails.plugins:asset-pipeline"
 
     // added dependencies
-    compile "com.h2database:h2:1.4.187"
+    runtime "mysql:mysql-connector-java:5.1.36"
 
     testCompile "org.grails:grails-plugin-testing"
     testCompile "org.grails.plugins:geb"
