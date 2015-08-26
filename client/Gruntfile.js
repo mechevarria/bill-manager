@@ -368,22 +368,6 @@ module.exports = function(grunt) {
                     configFile: 'test/protractor-conf.js'
                 }
             }
-        },
-
-        war: {
-            target: {
-                options: {
-                    war_dist_folder: '../',
-                    /* Folder where to generate the WAR. */
-                    war_name: 'client' /* The name fo the WAR file (.war will be the extension) */
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%=  yeoman.dist %>',
-                    src: ['**'],
-                    dest: ''
-                }]
-            }
         }
     });
 
@@ -431,8 +415,7 @@ module.exports = function(grunt) {
         'uglify',
         'filerev',
         'usemin',
-        'htmlmin',
-        'war'
+        'htmlmin'
     ]);
 
     grunt.registerTask('default', [

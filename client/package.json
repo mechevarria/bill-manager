@@ -27,7 +27,6 @@
         "jshint-stylish": "^0.2.0",
         "load-grunt-tasks": "^0.4.0",
         "time-grunt": "^0.3.1",
-        "grunt-war": "~0.4.4",
         "grunt-protractor-runner": "^1.2.1",
         "protractor-jasmine2-html-reporter": "^0.0.3",
         "grunt-connect-proxy":"^0.2.0",
