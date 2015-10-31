@@ -118,16 +118,16 @@
       -->
     <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="_version_" type="long" indexed="true" stored="true"/>
-    <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <field name="_text_" type="text_en_splitting" indexed="true" stored="false" multiValued="true"/>
 
     <!-- custom fields for bill-manager -->
     <field name="db_id" type="string" indexed="true" stored="true"/>
     <field name="item_date" type="date" indexed="true" stored="true"/>
-    <field name="author" type="text_general" indexed="true" stored="true"/>
-    <field name="description" type="text_general" indexed="true" stored="true"/>
+    <field name="author" type="text_en_splitting" indexed="true" stored="true"/>
+    <field name="description" type="text_en_splitting" indexed="true" stored="true"/>
     <field name="price"  type="float" indexed="true" stored="true"/>
     <field name="last_modified" type="date" indexed="true" stored="true"/>
-    <field name="category" type="text_general" indexed="true" stored="true"/>
+    <field name="category" type="text_en_splitting" indexed="true" stored="true"/>
 
     <!-- <copyField source="*" dest="_text_"/> -->
 
