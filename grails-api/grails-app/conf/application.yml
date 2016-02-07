@@ -118,3 +118,4 @@ environments:
 ---
 server:
     'contextPath': '/api'
+    'port': '8181'
