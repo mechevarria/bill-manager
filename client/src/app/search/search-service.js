@@ -1,6 +1,6 @@
 'use strict';
 
-app.factory('SearchSrvc', function($http, $q, $timezone) {
+app.factory('SearchSrvc', function($http, $q) {
     var resource = '/solr/bills';
     var factory = {};
 
@@ -15,7 +15,7 @@ app.factory('SearchSrvc', function($http, $q, $timezone) {
             'commit': true,
             'wt': 'json',
             'clean': clean,
-            'TZ' : $timezone.getName()
+            'TZ' : moment.tz.guess()
         };
 
         var deferred = $q.defer();
@@ -69,7 +69,7 @@ app.factory('SearchSrvc', function($http, $q, $timezone) {
                 'wt': 'json',
                 'q': query,
                 'rows': 2147483647,
-                'TZ' : $timezone.getName(),
+                'TZ' : moment.tz.guess(),
                 'facet': true,
                 'facet.mincount': 1,
                 'facet.field': 'category',
