@@ -1,6 +1,6 @@
 conf=$(pwd)/bills/conf
 lib=/opt/solr/dist
-db=*.jar
+db=mysql*.jar
 solr_home=/var/solr/data/bills
 solr_conf=${solr_home}/conf
 solr_lib=${solr_home}/lib
