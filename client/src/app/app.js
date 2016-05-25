@@ -12,8 +12,7 @@ var app = angular
         'smart-table',
         'angular-loading-bar',
         'toaster',
-        'highcharts-ng',
-        'ngTimezone'
+        'highcharts-ng'
     ]);
 
 app.config(function($routeProvider, localStorageServiceProvider, $compileProvider) {
