@@ -21,6 +21,7 @@
   "globals": {
     "angular": false,
     "app": true,
-    "_": false
+    "_": false,
+    "moment": false
   }
 }
