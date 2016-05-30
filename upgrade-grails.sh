@@ -2,7 +2,7 @@ bak=grails-api.bak
 api=grails-api
 
 mv ${api} ${bak}
-grails create-app ${api} --profile=web-api
+grails create-app ${api} --profile=rest-api
 
 ###
 printf '\nwar {\n  archiveName = "api.war"\n  destinationDir = file("../")\n}' >> ${api}/build.gradle
