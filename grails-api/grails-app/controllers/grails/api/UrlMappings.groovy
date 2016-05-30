@@ -1,3 +1,5 @@
+package grails.api
+
 class UrlMappings {
 
     static mappings = {
@@ -7,8 +9,8 @@ class UrlMappings {
             }
         }
 
-        "/"(controller: 'index')
-        "500"(controller: 'InternalServerError')
-        "404"(controller: 'NotFound')
+        "/"(controller: 'application', action:'index')
+        "500"(view: '/error')
+        "404"(view: '/notFound')
     }
 }
