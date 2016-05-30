@@ -1,8 +1,11 @@
 ---
 grails:
-    profile: web
+    profile: rest-api
     codegen:
         defaultPackage: api
+    spring:
+        transactionManagement:
+            proxies: false
 info:
     app:
         name: '@info.app.name@'
@@ -54,17 +57,6 @@ grails:
         defaultScope: singleton
     converters:
         encoding: UTF-8
-    views:
-        default:
-            codec: html
-        gsp:
-            encoding: UTF-8
-            htmlcodec: xml
-            codecs:
-                expression: html
-                scriptlets: html
-                taglib: none
-                staticparts: none
 ---
 hibernate:
     cache:
