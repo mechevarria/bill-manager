@@ -19,7 +19,6 @@ app.controller('EditCtrl', function($scope, $modal, $rootScope, localStorageServ
         var detailTotal = 0;
 
         angular.forEach(expenses, function(expense) {
-            total = 0;
             detailTotal = 0;
             if (expense.hasDetails) {
                 angular.forEach(expense.details, function(detail) {
