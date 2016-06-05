@@ -127,7 +127,7 @@
     <field name="description" type="text_en_splitting" indexed="true" stored="true"/>
     <field name="price"  type="float" indexed="true" stored="true"/>
     <field name="last_modified" type="date" indexed="true" stored="true"/>
-    <field name="category" type="text_en_splitting" indexed="true" stored="true"/>
+    <field name="category" type="string" indexed="true" stored="true"/>
 
     <!-- <copyField source="*" dest="_text_"/> -->
 

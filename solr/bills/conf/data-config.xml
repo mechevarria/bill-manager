@@ -39,11 +39,12 @@ o.label as author,
 d.description,
 d.amount as price,
 d.last_updated as last_modified,
-'detail' as category
+e.name as category
 from detail d
 left join owner o
-on d.personal = o.name
-where '${dataimporter.request.clean}' != 'false'
+on d.personal = o.name, expense e
+where d.expense_id = e.id
+and '${dataimporter.request.clean}' != 'false'
 or d.last_updated > '${dataimporter.last_index_time}'
 ">
         </entity>
