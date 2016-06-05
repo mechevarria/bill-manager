@@ -1,0 +1,1 @@
+sudo ./~/install_solr_service.sh ~/solr-6.0.1.zip -f -u vmuser
