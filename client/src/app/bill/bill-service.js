@@ -133,11 +133,45 @@ app.factory('BillSrvc', function ($http, $q) {
     return deferred.promise;
   };
 
+  factory.getSummary = function() {
+    var deferred = $q.defer();
+
+    $http.get(resource + 'summary').success(function (data) {
+      var bills = [];
+
+      // Query: select b.id, b.billDate, b.year, b.totalExpense, b.totalIncome from Bill b
+      angular.forEach(data, function(item) {
+
+        var bill = {
+          id: item[0],
+          billDate: item[1],
+          year: item[2],
+          totalExpense: item[3],
+          totalIncome: item[4]
+        };
+
+        bills.push(bill);
+      });
+
+
+      deferred.resolve(bills);
+    });
+
+    return deferred.promise;
+  };
+
   factory.getIds = function () {
     var deferred = $q.defer();
 
-    $http.get(resource + 'ids').success(function (data) {
-      deferred.resolve(data);
+    $http.get(resource + 'summary').success(function (data) {
+      var ids = [];
+
+      // first entry is the bill id
+      angular.forEach(data, function(bill) {
+        ids.push(bill[0]);
+      });
+
+      deferred.resolve(ids);
     });
 
     return deferred.promise;

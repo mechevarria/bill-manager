@@ -15,7 +15,6 @@ app.controller('ExportModalCtrl', function($scope, $modalInstance, $timeout, Def
 
             // add one to total for the defaults
             $scope.total = idList.length + 1;
-
             getExportData(idList);
         });
 

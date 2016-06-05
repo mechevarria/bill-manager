@@ -21,10 +21,10 @@ class BillController {
         render results as JSON
     }
 
-    def ids() {
-        def ids = Bill.executeQuery("select b.id from Bill b")
+    def summary() {
+        def summary = Bill.executeQuery("select b.id, b.billDate, b.year, b.totalExpense, b.totalIncome from Bill b")
 
-        render ids as JSON
+        render summary as JSON
     }
 
     def get() {

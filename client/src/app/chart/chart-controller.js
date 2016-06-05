@@ -143,8 +143,8 @@ app.controller('ChartCtrl', function($scope, BillSrvc) {
         }];
         $scope.selectedYear = $scope.years[0];
 
-        BillSrvc.getAllBills().then(function(data) {
-            $scope.allBills = data.bills;
+        BillSrvc.getSummary().then(function(data) {
+            $scope.allBills = data;
 
             $scope.expenses = [];
             $scope.incomes = [];
