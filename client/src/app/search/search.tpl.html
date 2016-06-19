@@ -1,95 +1,113 @@
 <div class="panel panel-default">
-    <div class="panel-heading">Expense | Income | Details&nbsp;&nbsp;&nbsp;Search</div>
-    <div class="panel-body">
-        <p>
-            <form ng-submit="addParam(param)" class="form-inline">
-                <select class="form-control" ng-options="operator.label for operator in searchOperators" ng-model="selectedOperator" ng-change="doSearch()">
-                </select>
-                <div class="form-group">
-                    <div class="input-group input-group-override">
-                        <input type="text" class="form-control" ng-model="param">
+  <div class="panel-heading">Expense | Income | Details&nbsp;&nbsp;&nbsp;Search</div>
+  <div class="panel-body">
+    <p>
+    <form ng-submit="addParam(param)" class="form-inline">
+      <select class="form-control" ng-options="operator.label for operator in searchOperators"
+              ng-model="selectedOperator" ng-change="doSearch()">
+      </select>
+      <div class="form-group">
+        <div class="input-group input-group-override">
+          <input type="text" class="form-control" ng-model="param">
                         <span class="input-group-btn">
                         <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> Search</button>
                         </span>
-                    </div>
-                </div>
-            </form>
-        </p>
-        <div class="row">
-            <div class="col-md-2">
-                <accordion close-others="oneAtATime">
-                    <accordion-group is-open="category.open">
-                        <accordion-heading>
-                            Category<i class="pull-right arrow-padding fa" ng-class="{'fa-chevron-down': category.open, 'fa-chevron-right': !category.open}"></i>
-                        </accordion-heading>
-                        <ul class="list-unstyled" ng-repeat="facet in categoryFacets">
-                            <li>
-                                <a href="" ng-click="addCategoryParam(facet.label)">{{facet.label}}</a>
-                                <span class="pull-right">{{facet.value}}</span>
-                            </li>
-                        </ul>
-                    </accordion-group>
-                    <accordion-group is-open="date.open">
-                        <accordion-heading>
-                            Date<i class="pull-right arrow-padding fa" ng-class="{'fa-chevron-down': date.open, 'fa-chevron-right': !date.open}"></i>
-                        </accordion-heading>
-                        <ul class="list-unstyled" ng-repeat="facet in dateFacets">
-                            <li>
-                                <a href="" ng-click="addDateParam(facet.label)">{{facet.label | date:'yyyy'}}</a>
-                                <span class="pull-right">{{facet.value}}</span>
-                            </li>
-                        </ul>
-                    </accordion-group>
-                </accordion>
-            </div>
-            <div class="col-md-10">
-                <div class="well">
-                    <p>
-                        You searched for:
+        </div>
+      </div>
+    </form>
+    </p>
+    <div class="row">
+      <div class="col-md-2">
+        <accordion close-others="oneAtATime">
+          <accordion-group is-open="category.open">
+            <accordion-heading>
+              Category<i class="pull-right arrow-padding fa"
+                         ng-class="{'fa-chevron-down': category.open, 'fa-chevron-right': !category.open}"></i>
+            </accordion-heading>
+            <ul class="list-unstyled" ng-repeat="facet in categoryFacets">
+              <li>
+                <a href="" ng-click="addCategoryParam(facet.label)">{{facet.label}}</a>
+                <span class="pull-right">{{facet.value}}</span>
+              </li>
+            </ul>
+          </accordion-group>
+
+          <accordion-group is-open="date.open">
+            <accordion-heading>
+              Date<i class="pull-right arrow-padding fa"
+                     ng-class="{'fa-chevron-down': date.open, 'fa-chevron-right': !date.open}"></i>
+            </accordion-heading>
+            <ul class="list-unstyled" ng-repeat="facet in dateFacets">
+              <li>
+                <a href="" ng-click="addDateParam(facet.label)">{{facet.label | date:'yyyy'}}</a>
+                <span class="pull-right">{{facet.value}}</span>
+              </li>
+            </ul>
+          </accordion-group>
+
+          <accordion-group is-open="price.open">
+            <accordion-heading>
+              Amount<i class="pull-right arrow-padding fa"
+                     ng-class="{'fa-chevron-down': price.open, 'fa-chevron-right': !price.open}"></i>
+            </accordion-heading>
+            <ul class="list-unstyled" ng-repeat="facet in priceFacets">
+              <li>
+                <a href="" ng-click="addPriceParam(facet.label)">{{ getAmountLabel(facet.label) }}</a>
+                <span class="pull-right">{{facet.value}}</span>
+              </li>
+            </ul>
+          </accordion-group>
+        </accordion>
+      </div>
+      <div class="col-md-10">
+        <div class="well">
+          <p>
+            You searched for:
                         <span ng-repeat="param in searchParams">
-                            <button class="btn btn-default btn-sm" ng-click="removeParam($index)">{{param.label}} <i class="fa fa-times"></i></button>&nbsp;
+                            <button class="btn btn-default btn-sm" ng-click="removeParam($index)">{{param.label}} <i
+                              class="fa fa-times"></i></button>&nbsp;
                             <span ng-if="!$last">{{selectedOperator.action}}</span>
                         </span>
-                    </p>
-                    <ul class="list-inline">
-                        <li>
-                            <label class="control-label">Results</label>
-                            <span class="form-control-static">{{count}}</span>
-                        </li>
-                        <li>
-                            <label class="control-label">Sum of results</label>
-                            <span class="form-control-static">{{sum | currency}}</span>
-                        </li>
-                    </ul>
-                </div>
-                <table class="table" st-table="displayedResults" st-safe-src="results">
-                    <thead>
-                        <tr>
-                            <th st-sort="category">Category</th>
-                            <th st-sort="date">Date</th>
-                            <th st-sort="amount">Amount</th>
-                            <th st-sort="description">Description</th>
-                            <th st-sort="owner">Owner</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="result in displayedResults">
-                            <td>{{result.category}}</td>
-                            <td>{{result.date | date : 'MMMM dd, yyyy'}}</td>
-                            <td ng-class="{ 'text-danger' : result.amount < 0 }">{{result.amount | currency}}</td>
-                            <td>{{result.description}}</td>
-                            <td>{{result.owner}}</td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="6" class="text-center">
-                                <div st-pagination="" st-items-by-page="15" st-displayed-pages="30"></div>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+          </p>
+          <ul class="list-inline">
+            <li>
+              <label class="control-label">Results</label>
+              <span class="form-control-static">{{count}}</span>
+            </li>
+            <li>
+              <label class="control-label">Sum of results</label>
+              <span class="form-control-static">{{sum | currency}}</span>
+            </li>
+          </ul>
         </div>
+        <table class="table" st-table="displayedResults" st-safe-src="results">
+          <thead>
+          <tr>
+            <th st-sort="category">Category</th>
+            <th st-sort="date">Date</th>
+            <th st-sort="amount">Amount</th>
+            <th st-sort="description">Description</th>
+            <th st-sort="owner">Owner</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr ng-repeat="result in displayedResults">
+            <td>{{result.category}}</td>
+            <td>{{result.date | date : 'MMMM dd, yyyy'}}</td>
+            <td ng-class="{ 'text-danger' : result.amount < 0 }">{{result.amount | currency}}</td>
+            <td>{{result.description}}</td>
+            <td>{{result.owner}}</td>
+          </tr>
+          </tbody>
+          <tfoot>
+          <tr>
+            <td colspan="6" class="text-center">
+              <div st-pagination="" st-items-by-page="15" st-displayed-pages="30"></div>
+            </td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
+  </div>
 </div>
