@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('EditCtrl', function($scope, $modal, $rootScope, localStorageService, BillSrvc, SearchSrvc) {
+app.controller('EditCtrl', function($scope, $uibModal, $rootScope, localStorageService, BillSrvc, SearchSrvc) {
 
     function getIncome(name, incomes) {
         var total = 0;
@@ -190,7 +190,7 @@ app.controller('EditCtrl', function($scope, $modal, $rootScope, localStorageServ
     };
 
     $scope.deleteExpense = function(expense) {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'app/delete-modal/delete-modal.tpl.html',
             controller: 'DeleteModalCtrl',
             resolve: {
@@ -220,7 +220,7 @@ app.controller('EditCtrl', function($scope, $modal, $rootScope, localStorageServ
     };
 
     $scope.deleteIncome = function(income) {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'app/delete-modal/delete-modal.tpl.html',
             controller: 'DeleteModalCtrl',
             resolve: {

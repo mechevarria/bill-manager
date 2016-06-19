@@ -1,13 +1,13 @@
 <!-- add -->
-<div ng-controller="AddCtrl" collapse="hideAdd" ng-include="'app/bill/add/add.tpl.html'">
+<div ng-controller="AddCtrl" uib-collapse="hideAdd" ng-include="'app/bill/add/add.tpl.html'">
 </div>
 
 <!-- edit -->
-<div ng-controller="EditCtrl" collapse="hideEdit" ng-include="'app/bill/edit/edit.tpl.html'">
+<div ng-controller="EditCtrl" uib-collapse="hideEdit" ng-include="'app/bill/edit/edit.tpl.html'">
 </div>
 
 <!-- list -->
-<div class="panel panel-default" collapse="hideList">
+<div class="panel panel-default" uib-collapse="hideList">
     <div class="panel-heading">List of all Bills</div>
     <div class="panel-body">
         <table class="table" st-table="bills" st-pipe="updateTable">

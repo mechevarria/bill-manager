@@ -1,17 +1,17 @@
 'use strict';
 
-app.controller('DeleteModalCtrl', function($scope, $modalInstance, item, details, showUpdate) {
+app.controller('DeleteModalCtrl', function($scope, $uibModalInstance, item, details, showUpdate) {
 
   $scope.item = item;
   $scope.details = details;
   $scope.showUpdate = showUpdate;
 
   $scope.ok = function() {
-    $modalInstance.close($scope.item);
+    $uibModalInstance.close($scope.item);
   };
 
   $scope.cancel = function() {
-    $modalInstance.dismiss();
+    $uibModalInstance.dismiss();
   };
 
 });

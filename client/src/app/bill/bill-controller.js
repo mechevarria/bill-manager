@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('BillCtrl', function($scope, $modal, $rootScope, BillSrvc, DefaultsSrvc, SearchSrvc) {
+app.controller('BillCtrl', function($scope, $uibModal, $rootScope, BillSrvc, DefaultsSrvc, SearchSrvc) {
 
     function load() {
         $scope.defaults = {};
@@ -59,7 +59,7 @@ app.controller('BillCtrl', function($scope, $modal, $rootScope, BillSrvc, Defaul
     });
 
     $scope.doConfirm = function(bill) {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'app/delete-modal/delete-modal.tpl.html',
             controller: 'DeleteModalCtrl',
             resolve: {

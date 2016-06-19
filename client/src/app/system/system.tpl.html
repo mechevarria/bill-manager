@@ -10,8 +10,8 @@
     <div class="panel panel-default">
         <div class="panel-heading" id="defaults-heading">Defaults When Adding New</div>
         <div class="panel-body">
-            <tabset>
-                <tab heading="Owners" class="tabs" id="owner-tab">
+            <uib-tabset>
+                <uib-tab heading="Owners" class="tabs" id="owner-tab">
                     <div class="row">
                         <div class="col-md-6" ng-repeat="owner in toEdit.owners">
                             <ng-form name="innerForm">
@@ -27,8 +27,8 @@
                             </div>
                         </div>
                     </div>
-                </tab>
-                <tab heading="Income" class="tabs" id="income-tab">
+                </uib-tab>
+                <uib-tab heading="Income" class="tabs" id="income-tab">
                     <table class="table">
                         <thead>
                             <tr>
@@ -77,8 +77,8 @@
                             </tr>
                         </tbody>
                     </table>
-                </tab>
-                <tab heading="Expenses" class="tabs" id="expense-tab">
+                </uib-tab>
+                <uib-tab heading="Expenses" class="tabs" id="expense-tab">
                     <table class="table">
                         <thead>
                             <tr>
@@ -130,8 +130,8 @@
                             </tr>
                         </tbody>
                     </table>
-                </tab>
-            </tabset>
+                </uib-tab>
+            </uib-tabset>
             <button type="submit" class="btn btn-success" ng-disabled="defaults.$invalid">
                 <i class="fa fa-check"></i> Update
             </button>

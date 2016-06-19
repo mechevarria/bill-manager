@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('DetailsCtrl', function ($scope, $modal, $rootScope, CsvSrvc) {
+app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) {
 
   $scope.$on('editDetail', function (event, details) {
     $scope.details = details;
@@ -27,7 +27,7 @@ app.controller('DetailsCtrl', function ($scope, $modal, $rootScope, CsvSrvc) {
   };
 
   $scope.removeAll = function () {
-    var modalInstance = $modal.open({
+    var modalInstance = $uibModal.open({
       templateUrl: 'app/delete-modal/delete-modal.tpl.html',
       controller: 'DeleteModalCtrl',
       resolve: {
@@ -60,7 +60,7 @@ app.controller('DetailsCtrl', function ($scope, $modal, $rootScope, CsvSrvc) {
   };
 
   $scope.deleteDetail = function (detail) {
-    var modalInstance = $modal.open({
+    var modalInstance = $uibModal.open({
       templateUrl: 'app/delete-modal/delete-modal.tpl.html',
       controller: 'DeleteModalCtrl',
       resolve: {

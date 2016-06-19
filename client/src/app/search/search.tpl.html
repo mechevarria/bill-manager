@@ -18,46 +18,46 @@
     </p>
     <div class="row">
       <div class="col-md-2">
-        <accordion close-others="oneAtATime">
-          <accordion-group is-open="category.open">
-            <accordion-heading>
+        <uib-accordion close-others="oneAtATime">
+          <uib-accordion-group is-open="category.open">
+            <uib-accordion-heading>
               Category<i class="pull-right arrow-padding fa"
                          ng-class="{'fa-chevron-down': category.open, 'fa-chevron-right': !category.open}"></i>
-            </accordion-heading>
+            </uib-accordion-heading>
             <ul class="list-unstyled" ng-repeat="facet in categoryFacets">
               <li>
                 <a href="" ng-click="addCategoryParam(facet.label)">{{facet.label}}</a>
                 <span class="pull-right">{{facet.value}}</span>
               </li>
             </ul>
-          </accordion-group>
+          </uib-accordion-group>
 
-          <accordion-group is-open="date.open">
-            <accordion-heading>
+          <uib-accordion-group is-open="date.open">
+            <uib-accordion-heading>
               Date<i class="pull-right arrow-padding fa"
                      ng-class="{'fa-chevron-down': date.open, 'fa-chevron-right': !date.open}"></i>
-            </accordion-heading>
+            </uib-accordion-heading>
             <ul class="list-unstyled" ng-repeat="facet in dateFacets">
               <li>
                 <a href="" ng-click="addDateParam(facet.label)">{{facet.label | date:'yyyy'}}</a>
                 <span class="pull-right">{{facet.value}}</span>
               </li>
             </ul>
-          </accordion-group>
+          </uib-accordion-group>
 
-          <accordion-group is-open="price.open">
-            <accordion-heading>
+          <uib-accordion-group is-open="price.open">
+            <uib-accordion-heading>
               Amount<i class="pull-right arrow-padding fa"
                      ng-class="{'fa-chevron-down': price.open, 'fa-chevron-right': !price.open}"></i>
-            </accordion-heading>
+            </uib-accordion-heading>
             <ul class="list-unstyled" ng-repeat="facet in priceFacets">
               <li>
                 <a href="" ng-click="addPriceParam(facet.label)">{{ getAmountLabel(facet.label) }}</a>
                 <span class="pull-right">{{facet.value}}</span>
               </li>
             </ul>
-          </accordion-group>
-        </accordion>
+          </uib-accordion-group>
+        </uib-accordion>
       </div>
       <div class="col-md-10">
         <div class="well">

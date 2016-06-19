@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('SystemCtrl', function($scope, $rootScope, $modal, DefaultsSrvc, DeleteSrvc) {
+app.controller('SystemCtrl', function($scope, $rootScope, $uibModal, DefaultsSrvc, DeleteSrvc) {
 
     function loadDefaults() {
         DefaultsSrvc.get().then(function(defaults) {
@@ -61,7 +61,7 @@ app.controller('SystemCtrl', function($scope, $rootScope, $modal, DefaultsSrvc, 
     };
 
     $scope.deleteExpense = function(expense) {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'app/delete-modal/delete-modal.tpl.html',
             controller: 'DeleteModalCtrl',
             resolve: {
@@ -91,7 +91,7 @@ app.controller('SystemCtrl', function($scope, $rootScope, $modal, DefaultsSrvc, 
     };
 
     $scope.deleteIncome = function(income) {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'app/delete-modal/delete-modal.tpl.html',
             controller: 'DeleteModalCtrl',
             resolve: {
@@ -148,7 +148,7 @@ app.controller('SystemCtrl', function($scope, $rootScope, $modal, DefaultsSrvc, 
     };
 
     $scope.confirmErase = function() {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'app/delete-modal/delete-modal.tpl.html',
             controller: 'DeleteModalCtrl',
             resolve: {
@@ -186,7 +186,7 @@ app.controller('SystemCtrl', function($scope, $rootScope, $modal, DefaultsSrvc, 
     };
 
     $scope.doExport = function() {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'app/system/export-modal.tpl.html',
             controller: 'ExportModalCtrl'
         });
@@ -201,7 +201,7 @@ app.controller('SystemCtrl', function($scope, $rootScope, $modal, DefaultsSrvc, 
     };
 
     $scope.doImport = function() {
-        $modal.open({
+        $uibModal.open({
             templateUrl: 'app/system/import-modal.tpl.html',
             controller: 'ImportModalCtrl'
         });

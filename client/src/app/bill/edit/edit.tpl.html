@@ -2,8 +2,8 @@
     <div class="panel-heading">Editing {{toEdit.month}} - {{toEdit.year}}</div>
     <div class="panel-body">
         <form role="form" novalidate name="billForm" ng-submit="doSave(billForm.$valid, toEdit)">
-            <tabset>
-                <tab heading="Summary" class="tabs">
+            <uib-tabset>
+                <uib-tab heading="Summary" class="tabs">
                     <p>
                         <div class="panel panel-default">
                             <div class="panel-body">
@@ -77,8 +77,8 @@
                             </table>
                         </div>
                     </div>
-                </tab>
-                <tab heading="Income" class="tabs">
+                </uib-tab>
+                <uib-tab heading="Income" class="tabs">
                     <p>
                         <div class="panel panel-default">
                             <div class="panel-body">
@@ -132,8 +132,8 @@
                             </tbody>
                         </table>
                     </p>
-                </tab>
-                <tab heading="Expenses" class="tabs">
+                </uib-tab>
+                <uib-tab heading="Expenses" class="tabs">
                     <div ng-show="hideDetails">
                         <p>
                             <div class="panel panel-default">
@@ -207,10 +207,10 @@
                         </p>
                     </div>
                     <!-- details -->
-                    <div collapse="hideDetails" ng-controller="DetailsCtrl" ng-include="'app/bill/edit/details/details.tpl.html'">
+                    <div uib-collapse="hideDetails" ng-controller="DetailsCtrl" ng-include="'app/bill/edit/details/details.tpl.html'">
                     </div>
-                </tab>
-            </tabset>
+                </uib-tab>
+            </uib-tabset>
             <button type="submit" class="btn btn-success" ng-disabled="billForm.$invalid">
                 <i class="fa fa-check"></i> Update
             </button>
