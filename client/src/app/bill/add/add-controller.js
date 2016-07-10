@@ -2,6 +2,12 @@
 
 app.controller('AddCtrl', function($scope, $rootScope, $filter, toaster, BillSrvc) {
 
+    // uib-datepicker options
+    $scope.options = {
+      datepickerMode: 'month',
+      minMode: 'month'
+    };
+
     $scope.doAdd = function(isValid, bill) {
         if (isValid) {
             bill.incomes = $scope.defaults.incomes;
