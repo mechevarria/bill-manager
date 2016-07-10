@@ -105,9 +105,10 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
       return false;
     }
 
-    if (detail.description == 'ONLINE PAYMENT - THANK YOU') {
+    if (_.includes(['ONLINE PAYMENT - THANK YOU', 'ONLINE PYMT-THANK YOU    ATLANTA      GA'], detail.description)) {
       return false;
     }
+
 
     return true;
   }
