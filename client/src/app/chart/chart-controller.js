@@ -166,8 +166,11 @@ app.controller('ChartCtrl', function($scope, BillSrvc) {
 
             });
 
-            $scope.years = $scope.years.concat(_.uniq(years, 'value'));
-            $scope.years = _.sortBy($scope.years, 'value');
+            years = _.uniqBy(years, 'value');
+
+            $scope.years = $scope.years.concat(years);
+
+            $scope.years = _.orderBy($scope.years, 'value', 'desc');
 
             // sort arrays by date
             $scope.expenses.sort(sortFunction);
