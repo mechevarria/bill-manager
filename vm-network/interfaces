@@ -14,4 +14,3 @@ auto enp0s8
 iface enp0s8 inet static
 address 10.2.2.3
 netmask 255.255.255.0
-gateway 10.2.2.1
