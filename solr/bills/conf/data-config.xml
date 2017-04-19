@@ -12,8 +12,6 @@ i.last_updated as last_modified,
 'income' as category
 from income i, owner o
 where i.owner = o.name
-and ('${dataimporter.request.clean}' != 'false'
-or i.last_updated > '${dataimporter.last_index_time}')
 ">
         </entity>
         <entity name="expense" query="
@@ -27,8 +25,6 @@ e.last_updated as last_modified,
 'expense' as category
 from expense e, owner o
 where e.paid = o.name
-and ('${dataimporter.request.clean}' != 'false'
-or e.last_updated > '${dataimporter.last_index_time}')
 ">
         </entity>
         <entity name="detail" query="
@@ -44,8 +40,6 @@ from detail d
 left join owner o
 on d.personal = o.name, expense e
 where d.expense_id = e.id
-and '${dataimporter.request.clean}' != 'false'
-or d.last_updated > '${dataimporter.last_index_time}'
 ">
         </entity>
     </document>
