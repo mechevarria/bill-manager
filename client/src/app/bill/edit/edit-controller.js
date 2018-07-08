@@ -55,11 +55,14 @@ app.controller('EditCtrl', function($scope, $uibModal, $rootScope, localStorageS
 
     function getPercent(owner1Income, owner2Income, higherIncome) {
         var percent = 0;
+        var difference = 0;
 
         if (higherIncome == $scope.defaults.owners[0].id) {
-            percent = (owner1Income - owner2Income) / owner2Income;
+            difference = owner1Income - owner2Income;
+            percent = difference / owner1Income;
         } else {
-            percent = (owner2Income - owner1Income) / owner1Income;
+            difference = owner2Income - owner1Income;
+            percent = difference / owner2Income;
         }
 
         return percent;
