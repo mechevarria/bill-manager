@@ -1,3 +1,3 @@
 CREATE DATABASE billDb;
-CREATE USER 'app'@'localhost' IDENTIFIED BY 'app';
+CREATE USER 'app'@'%' IDENTIFIED BY 'app';
 GRANT ALL PRIVILEGES ON billDb.* TO 'app'@'%' WITH GRANT OPTION;
