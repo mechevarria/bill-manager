@@ -1,5 +1,5 @@
 <dataConfig>
-        <dataSource driver="com.mysql.cj.jdbc.Driver" url="jdbc:mysql://localhost:3306/billDb" user="app" password="app" />
+        <dataSource driver="com.mysql.cj.jdbc.Driver" url="jdbc:mysql://localhost:3306/billDb?serverTimezone=EST" user="app" password="app" />
         <document>
                 <entity name="income" query="
 select
