@@ -174,3 +174,17 @@ cp data-config.xml /var/solr/data/bills/conf/
 <copyField source="category" dest="_text_" />
 <!-- ********** end custom fields ********** -->
 ```
+
+### Deploy Grails REST API
+
+* Follow the sdkman instructions [here](https://www.grails.org/download.html)
+
+* Build a tomcat deployable war `grails war`
+
+* Add context to deploy war from the `grails-api/build` directory
+```bash
+sudo cp api.xml /var/lib/tomcat9/conf/Catalina/localhost/
+```
+
+### Deploy AngularJS client
+
