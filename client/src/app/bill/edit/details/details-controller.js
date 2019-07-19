@@ -100,6 +100,12 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
     }
   }
 
+  function getAmexAmount(value) {
+    if (!angular.isUndefined(value)) {
+      return Number(value);
+    }
+  }
+
   function isValidDetail(detail) {
     if (angular.isUndefined(detail.amount) || angular.isUndefined(detail.description)) {
       return false;
@@ -120,10 +126,10 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
 
     angular.forEach(array, function (line) {
       // does this line start with a date?
-      if (moment(line[0], "MM/DD/YYYY").isValid()) {
+      if (moment(line[0], 'MM/DD/YYYY').isValid()) {
 
         // the amazon credit card detail starts with 2 dates
-        if (moment(line[1], "MM/DD/YYYY").isValid()) {
+        if (moment(line[1], 'MM/DD/YYYY').isValid()) {
           var description = '';
           var type = '';
 
@@ -148,14 +154,13 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
         }
         // this case handles american express
         else {
-
           var detail = {
-            'date': line[0],
+            'date': moment(line[0], 'M/DD/YYYY').format('L'),
             'reference': line[1],
-            'amount': getAmount(line[2]),
-            'description': line[3],
-            'type': line[4],
-            'personal': line[5]
+            'description': line[2],
+            'amount': getAmexAmount(line[5]),
+            'type': line[6],
+            'personal': line[8]
           };
         }
 
