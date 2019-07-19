@@ -7,6 +7,12 @@ Angular client and Grails api application to manage monthly expenses/income
 
 * Download and install [Ubuntu Server](https://ubuntu.com/download/server)
 
+* Make sure timezone is local and not UTC to prevent database save/import errors
+
+```bash
+sudo dpkg-reconfigure tzdata
+```
+
 ### Install JDK
 
 ```bash
