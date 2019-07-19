@@ -53,7 +53,7 @@ sudo systemctl enable apache2
 
 sudo cp 000-default.conf /etc/apache2/sites-available
 
-sudo ln -s client/dist /var/www/html/client
+sudo ln -s /home/vmuser/bill-manager/client/dist /var/www/html/client
 
 sudo systemctl restart apache2
 ```
