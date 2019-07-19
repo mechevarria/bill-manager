@@ -179,7 +179,7 @@ cp data-config.xml /var/solr/data/bills/conf/
 
 * Follow the sdkman instructions [here](https://www.grails.org/download.html)
 
-* Build a tomcat deployable war `grails war`
+* Inside the **grails-api** directory, build a tomcat deployable war `grails war`
 
 * Add context to deploy war from the `grails-api/build` directory
 ```bash
@@ -188,3 +188,15 @@ sudo cp api.xml /var/lib/tomcat9/conf/Catalina/localhost/
 
 ### Deploy AngularJS client
 
+* Inside the **client** directory run
+```bash
+npm install -g grunt-cli
+
+npm install -g bower
+
+npm install
+
+bower install
+
+grunt build
+```
