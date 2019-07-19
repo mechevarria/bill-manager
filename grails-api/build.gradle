@@ -76,5 +76,4 @@ task wrapper(type: Wrapper) {
 
 war {
   archiveName = "api.war"
-  destinationDir = file("../")
 }
