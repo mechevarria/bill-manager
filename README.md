@@ -87,16 +87,28 @@ sudo apt-get install -y mysql-server
 sudo systemctl enable mysql
 
 sudo usermod vmuser -a -G mysql
-
-mysql_secure_installation
 ```
 
-* Say no to disabling any options but set a **root** password
+* configure root user
+
+```bash
+sudo -u root -p
+```
+
+```sql
+DROP USER 'root'@'localhost';
+
+CREATE USER 'root'@'%' IDENTIFIED BY 'root';
+
+GRANT ALL PRIVILEGES on *.* to 'root'@'%' WITH GRANT OPTION;
+
+FLUSH PRIVILEGES;
+```
 
 * Setup the database and app user
 
 ```bash
-sudo mysql -u root -p < config.sql
+mysql -u root -p < config.sql
 ```
 * Edit `/etc/mysql/mysql.conf.d/mysqld.cnf` to allow remote access
 
@@ -150,11 +162,11 @@ cp data-config.xml /var/solr/data/bills/conf/
 ```xml
 <!-- ********** custom fields for bill-manager ********** -->
 <field name="db_id" type="string" indexed="true" stored="true" />
-<field name="item_date" type="date" indexed="true" stored="true" />
-<field name="author" type="text_general" indexed="true" stored="true" />
+<field name="item_date" type="pdate" indexed="true" stored="true" />
+<field name="author" type="string" indexed="true" stored="true" />
 <field name="description" type="text_general" indexed="true" stored="true" />
-<field name="price" type="float" indexed="true" stored="true" />
-<field name="last_modified" type="date" indexed="true" stored="true" />
+<field name="price" type="pfloat" indexed="true" stored="true" />
+<field name="last_modified" type="pdate" indexed="true" stored="true" />
 <field name="category" type="string" indexed="true" stored="true" />
  
 <copyField source="author" dest="_text_" />
