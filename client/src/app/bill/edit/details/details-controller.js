@@ -96,13 +96,9 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
 
   function getAmount(value) {
     if (!angular.isUndefined(value)) {
-      return Number(value) * -1;
-    }
-  }
-
-  function getAmexAmount(value) {
-    if (!angular.isUndefined(value)) {
       return Number(value);
+    } else {
+      return 0;
     }
   }
 
@@ -145,7 +141,7 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
           var detail = {
             'date': line[1],
             'reference': line[2],
-            'amount': getAmount(line[3]),
+            'amount': getAmount(line[3]) * -1,
             'description': description,
             'type': type,
             'personal': line[6]
@@ -158,7 +154,7 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
             'date': moment(line[0], 'M/DD/YYYY').format('L'),
             'reference': line[1],
             'description': line[2],
-            'amount': getAmexAmount(line[5]),
+            'amount': getAmount(line[5]),
             'type': line[6],
             'personal': line[8]
           };
