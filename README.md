@@ -192,6 +192,27 @@ cp data-config.xml /var/solr/data/bills/conf/
 sudo cp api.xml /var/lib/tomcat9/conf/Catalina/localhost/
 ```
 
+#### Upgrade Grails
+
+* Upgrading grails sometimes requires creating a new project
+```bash
+grails create-app grails-api --profile=rest-api
+```
+
+* Copy or Recreate domain classes if necessary. Example:
+```bash
+grails create-domain-class api.Bill
+```
+
+* Copy or Recreate controllers if necessary. Example:
+```bash
+grails create-controller api.Bill
+```
+
+* Copy **grails-app/init/grails/api/Bootstrap.groovy**
+
+* Update **application.yaml** and **build.gradle**
+
 ### Deploy AngularJS client
 
 * Inside the **client** directory run
