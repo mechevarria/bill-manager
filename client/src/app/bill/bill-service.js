@@ -1,13 +1,13 @@
 'use strict';
 
 app.factory('BillSrvc', function ($http, $q) {
-  var resource = '/api/bill/';
+  var resource = '/api/bill';
   var factory = {};
 
   factory.getAllBills = function () {
     var deferred = $q.defer();
 
-    $http.get(resource + 'index').success(function (data) {
+    $http.get(resource).success(function (data) {
       deferred.resolve(data);
     });
 
@@ -17,7 +17,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.getBills = function (offset, max, sort, order) {
     var deferred = $q.defer();
 
-    var url = resource + 'index';
+    var url = resource;
 
     var config = {
       params: {
@@ -45,7 +45,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.get = function (id) {
     var deferred = $q.defer();
 
-    $http.get(resource + 'get/' + id).
+    $http.get(resource + '/' + id).
       success(function (data) {
         deferred.resolve(data);
       }).
@@ -60,7 +60,7 @@ app.factory('BillSrvc', function ($http, $q) {
     var deferred = $q.defer();
     var response = {};
 
-    $http.post(resource + 'save', bill).
+    $http.post(resource, bill).
       success(function (data) {
         response = {
           data: data,
@@ -86,7 +86,7 @@ app.factory('BillSrvc', function ($http, $q) {
     var deferred = $q.defer();
     var response = {};
 
-    $http.put(resource + 'update', bill).
+    $http.put(resource + '/' + bill.id, bill).
       success(function (data) {
         response = {
           data: data,
@@ -112,7 +112,7 @@ app.factory('BillSrvc', function ($http, $q) {
     var deferred = $q.defer();
     var response = {};
 
-    $http.delete(resource + 'delete/' + id).
+    $http.delete(resource + '/' + id).
       success(function (msg) {
         response = {
           type: 'success',
@@ -136,7 +136,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.getSummary = function() {
     var deferred = $q.defer();
 
-    $http.get(resource + 'summary').success(function (data) {
+    $http.get('/api/summary').success(function (data) {
       var bills = [];
 
       // Query: select b.id, b.billDate, b.year, b.totalExpense, b.totalIncome from Bill b
@@ -163,7 +163,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.getIds = function () {
     var deferred = $q.defer();
 
-    $http.get(resource + 'summary').success(function (data) {
+    $http.get('/api/bill').success(function (data) {
       var ids = [];
 
       // first entry is the bill id

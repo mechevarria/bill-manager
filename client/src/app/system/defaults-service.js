@@ -1,14 +1,14 @@
 'use strict';
 
 app.factory('DefaultsSrvc', function($q, $http) {
-    var resource = '/api/defaults/';
+    var resource = '/api/defaults';
     var factory = {};
 
     factory.update = function(defaults) {
         var deferred = $q.defer();
         var response = {};
 
-        $http.post(resource + 'save.json', defaults).
+        $http.post(resource, defaults).
         success(function(data) {
             response = {
                 data: data,
@@ -32,7 +32,7 @@ app.factory('DefaultsSrvc', function($q, $http) {
     factory.get = function() {
         var deferred = $q.defer();
 
-        $http.get(resource + 'index').success(function(data) {
+        $http.get(resource).success(function(data) {
             deferred.resolve(data);
         });
 
