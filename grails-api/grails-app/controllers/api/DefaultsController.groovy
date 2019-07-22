@@ -1,7 +1,7 @@
 package api
 
 import grails.converters.JSON
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
 
 @Transactional(readOnly = true)
 class DefaultsController {
@@ -37,6 +37,7 @@ class DefaultsController {
             index()
 
         } catch (Exception ex) {
+            log.error "Error: ${ex.message}", ex
             render(status:500, text:ex.message)
         }
     }

@@ -5,7 +5,6 @@ import grails.test.mixin.Mock
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.*
 
-
 @TestMixin(GrailsUnitTestMixin)
 @Mock([Bill])
 class BillSpec extends Specification {

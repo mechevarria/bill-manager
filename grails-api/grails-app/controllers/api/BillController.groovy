@@ -1,13 +1,12 @@
 package api
 
 import grails.converters.JSON
-import grails.transaction.Transactional
-import org.apache.commons.logging.LogFactory
+import grails.gorm.transactions.Transactional
+
+import java.text.SimpleDateFormat
 
 @Transactional(readOnly = true)
 class BillController {
-
-    private static final log = LogFactory.getLog(this)
 
     def index() {
         def bills = Bill.list(max: params.size, offset: params.start, sort: params.sort, order: params.order)
@@ -22,18 +21,20 @@ class BillController {
     }
 
     def summary() {
+        log.info "getting bill summary"
         def summary = Bill.executeQuery("select b.id, b.billDate, b.year, b.totalExpense, b.totalIncome from Bill b")
 
         render summary as JSON
     }
 
-    def get() {
+    def show() {
         log.info "getting bill with id=$params.id"
 
         try {
             JSON.use("deep")
             render Bill.findById(params.id) as JSON
         } catch (Exception ex) {
+            log.error "Error: ${ex.message}", ex
             render(status: 500, text: ex.message)
         }
     }
@@ -41,14 +42,15 @@ class BillController {
     @Transactional
     def save(Bill bill) {
         try {
+
             log.info("Saving $bill.month - $bill.year")
-            bill.billDate = new Date().parse("dd-MMMM-yyyy", "01-$bill.month-$bill.year")
+            bill.billDate = new SimpleDateFormat("dd-MMMM-yyyy").parse("01-$bill.month-$bill.year")
 
             bill.expenses.each { expense ->
                 expense.details.each { detail ->
 
                     if (detail.date != null) {
-                        detail.detailDate = new Date().parse("MM/dd/yyyy", detail.date)
+                        detail.detailDate = new SimpleDateFormat("MM/dd/yyyy").parse(detail.date)
                     } else {
                         detail.detailDate = bill.billDate
                     }
@@ -84,6 +86,7 @@ class BillController {
             JSON.use("deep")
             render bill as JSON
         } catch (Exception ex) {
+            log.error "Error: ${ex.message}", ex
             render(status: 500, text: ex.message)
         }
     }
@@ -106,6 +109,7 @@ class BillController {
 
             render(status: 200, text: message)
         } catch (Exception ex) {
+            log.error "Error: ${ex.message}", ex
             render(status: 500, text: ex.message)
         }
     }

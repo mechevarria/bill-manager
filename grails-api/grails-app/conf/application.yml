@@ -2,19 +2,37 @@
 grails:
     profile: rest-api
     codegen:
-        defaultPackage: api
-    spring:
-        transactionManagement:
-            proxies: false
+        defaultPackage: grails.api
+    gorm:
+        reactor:
+            # Whether to translate GORM events into Reactor events
+            # Disabled by default for performance reasons
+            events: false
 info:
     app:
         name: '@info.app.name@'
         version: '@info.app.version@'
         grailsVersion: '@info.app.grailsVersion@'
 spring:
+    jmx:
+        unique-names: true
+    main:
+        banner-mode: "off"
     groovy:
         template:
             check-template-location: false
+    devtools:
+        restart:
+            additional-exclude:
+                - '*.gsp'
+                - '**/*.gsp'
+                - '*.gson'
+                - '**/*.gson'
+                - 'logback.groovy'
+                - '*.properties'
+management:
+    endpoints:
+        enabled-by-default: false
 
 ---
 grails:
@@ -28,28 +46,22 @@ grails:
                         - Presto
                         - Trident
         types:
-            all: '*/*'
+            json:
+              - application/json
+              - text/json   
+            hal:
+              - application/hal+json
+              - application/hal+xml  
+            xml:
+              - text/xml
+              - application/xml                                 
             atom: application/atom+xml
             css: text/css
             csv: text/csv
-            form: application/x-www-form-urlencoded
-            html:
-              - text/html
-              - application/xhtml+xml
             js: text/javascript
-            json:
-              - application/json
-              - text/json
-            multipartForm: multipart/form-data
-            pdf: application/pdf
             rss: application/rss+xml
             text: text/plain
-            hal:
-              - application/hal+json
-              - application/hal+xml
-            xml:
-              - text/xml
-              - application/xml
+            all: '*/*'            
     urlmapping:
         cache:
             maxsize: 1000
@@ -57,20 +69,19 @@ grails:
         defaultScope: singleton
     converters:
         encoding: UTF-8
+
 ---
 hibernate:
     cache:
         queries: false
-        use_second_level_cache: true
+        use_second_level_cache: false
         use_query_cache: false
-        region.factory_class: 'org.hibernate.cache.ehcache.EhCacheRegionFactory'
-
 dataSource:
     pooled: true
     jmxExport: true
     driverClassName: org.h2.Driver
     username: sa
-    password:
+    password: ''
 
 environments:
     development:
@@ -84,8 +95,8 @@ environments:
     production:
         dataSource:
             dialect: org.hibernate.dialect.MySQLDialect
-            driverClassName: com.mysql.jdbc.Driver
-            url: jdbc:mysql://localhost:3306/billDb
+            driverClassName: com.mysql.cj.jdbc.Driver
+            url: jdbc:mysql://localhost:3306/billDb?serverTimezone=EST
             username: app
             password: app
             dbCreate: update

@@ -1,9 +1,11 @@
+package grails.api
+
 import api.Defaults
 import api.Owner
 
 class BootStrap {
 
-    def init = { servletContext ->
+     def init = { servletContext ->
         if(Defaults.list().size() < 1) {
             def newDefaults = new Defaults()
                 .addToOwners(new Owner([name: 'owner1', label: 'owner1', color: 'info']))
