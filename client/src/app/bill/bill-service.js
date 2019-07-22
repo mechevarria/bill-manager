@@ -163,7 +163,7 @@ app.factory('BillSrvc', function ($http, $q) {
   factory.getIds = function () {
     var deferred = $q.defer();
 
-    $http.get('/api/bill').success(function (data) {
+    $http.get('/api/summary').success(function (data) {
       var ids = [];
 
       // first entry is the bill id
