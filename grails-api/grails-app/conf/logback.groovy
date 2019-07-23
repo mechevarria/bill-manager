@@ -22,17 +22,6 @@ appender('STDOUT', ConsoleAppender) {
     }
 }
 
-// custom rolling appender
-appender("ROLLING", RollingFileAppender) {
-  encoder(PatternLayoutEncoder) {
-      pattern = "%level %logger - %msg%n"
-  }
-  rollingPolicy(TimeBasedRollingPolicy) {
-      fileNamePattern = "/var/log/tomcat9/api-%d{yyyy-MM-dd}.log"
-      maxHistory = 30
-  }
-}
-
 def targetDir = BuildSettings.TARGET_DIR
 if (Environment.isDevelopmentMode() && targetDir != null) {
     appender("FULL_STACKTRACE", FileAppender) {
@@ -45,6 +34,6 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
     }
     logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
     root(ERROR, ['STDOUT', 'FULL_STACKTRACE'])
-} else {
-    root(INFO, ['ROLLING'])
 }
+
+root(INFO, ['STDOUT'])
