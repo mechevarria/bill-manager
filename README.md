@@ -64,27 +64,6 @@ sudo ln -s /home/vmuser/bill-manager/client/dist /var/www/html/client
 sudo systemctl restart apache2
 ```
 
-### Install Tomcat 9
-
-``` bash
-sudo apt-get install -y tomcat9 tomcat9-admin
-
-sudo systemctl status enable tomcat9
-```
-
-* Edit `/var/lib/tomcat9/conf/tomcat-users.xml`
-
-* Insert into the **tomcat-users** element
-
-```xml
-<role rolename="manager-gui" />
-<user username="tomcat" password="tomcat" roles="manager-gui" />
-```
-
-```bash
-sudo usermod vmuser -a -G tomcat
-```
-
 ### Install MySQL
 
 ```bash
@@ -185,11 +164,30 @@ cp data-config.xml /var/solr/data/bills/conf/
 
 * Follow the sdkman instructions [here](https://www.grails.org/download.html)
 
-* Inside the **grails-api** directory, build a tomcat deployable war `grails war`
-
-* Add context to deploy war from the `grails-api/build` directory
+* Inside the **grails-api** directory, build an executable jar
 ```bash
-sudo cp api.xml /var/lib/tomcat9/conf/Catalina/localhost/
+grails assemble
+```
+
+* Edit **grails.service** and make sure the path to executable jar is correct
+```bash
+/usr/bin/java -jar /home/vmuser/bill-manager/grails-api/build/libs/grails-api-0.1.jar
+```
+
+* Install and enable the service
+```bash
+sudo cp grails.service /etc/systemd/system
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable grails
+
+sudo systemctl start grails
+```
+
+* View logs from stdout with
+```bash
+sudo journalctl -u grails.service -f
 ```
 
 #### Upgrade Grails
