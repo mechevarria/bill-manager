@@ -1,1 +1,1 @@
-gunzip < *.sql.gz | mysql -u root -p billDb
+gunzip < ../*.sql.gz | mysql -u root -p billDb
