@@ -96,11 +96,13 @@ environments:
         dataSource:
             dialect: org.hibernate.dialect.MySQLDialect
             driverClassName: com.mysql.cj.jdbc.Driver
-            url: jdbc:mysql://localhost:3306/billDb?serverTimezone=EST
+            url: jdbc:mysql://localhost:3306/billDb
             username: app
             password: app
             dbCreate: update
             properties:
+                serverTimezone: EST
+                allowPublicKeyRetrieval: true
                 jmxEnabled: true
                 initialSize: 5
                 maxActive: 50

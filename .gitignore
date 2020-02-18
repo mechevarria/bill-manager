@@ -8,7 +8,6 @@ bower_components
 target
 .idea
 *.war
-*.sublime-*
 *.swp
 *.original
 *.log
