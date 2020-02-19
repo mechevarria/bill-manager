@@ -13,6 +13,14 @@ Angular client and Grails api application to manage monthly expenses/income
 sudo dpkg-reconfigure tzdata
 ```
 
+* Install [docker-ce](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+
+* Make sure the user that will run docker is in the docker group. In this example, the username is `vmuser`
+
+```bash
+sudo usermod vmuser -a -G docker
+```
+
 ### Install JDK
 
 ```bash
@@ -64,42 +72,53 @@ sudo ln -s /home/vmuser/bill-manager/client/dist /var/www/html/client
 sudo systemctl restart apache2
 ```
 
-### Install MySQL
+### Setup MySQL Docker Service
+
+* Test that the mysql docker service will work with
 
 ```bash
-sudo apt-get install -y mysql-server
-
-sudo systemctl enable mysql
-
-sudo usermod vmuser -a -G mysql
+mysql/docker-mysql.sh
 ```
 
-* configure root user
+* After making sure the container runs you can stop the container with 
+```bash
+docker stop mysql
+```
+
+* Verify the `ExecStart` line in `mysql/docker.mysql.service` is the same as the working command in `mysql/docker-mysql.sh`
+
+* Install and enable the service
 
 ```bash
-sudo -u root -p
+sudo cp mysql/docker.mysql.service /etc/systemd/system
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable docker.mysql
+
+sudo systemctl start docker.mysql
 ```
 
-```sql
-DROP USER 'root'@'localhost';
+#### Optional: Backup data from MySQL
 
-CREATE USER 'root'@'%' IDENTIFIED BY 'root';
-
-GRANT ALL PRIVILEGES on *.* to 'root'@'%' WITH GRANT OPTION;
-
-FLUSH PRIVILEGES;
-```
-
-* Setup the database and app user
+* Run the export script
 
 ```bash
-mysql -u root -p < config.sql
+./mysql/db-backup.sh
 ```
-* Edit `/etc/mysql/mysql.conf.d/mysqld.cnf` to allow remote access
 
+* `billDb.sql.gz` will be located in the directory above `bill-manager`
+
+#### Optional: Restore data from MySQL Export
+
+* Make sure `billDb.sql.gz` is located in the directory above `bill-manager`
+
+* Run the restore script
+
+```bash
+./mysql/db-restore.sh
 ```
-# bind-address          = 127.0.0.1
-```
+
 
 ### Install Solr
 
