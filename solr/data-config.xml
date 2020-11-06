@@ -1,0 +1,43 @@
+<dataConfig>
+        <dataSource driver="com.mysql.cj.jdbc.Driver" url="jdbc:mysql://mysql:3306/billDb?serverTimezone=EST" user="app" password="app" />
+        <document>
+                <entity name="income" query="
+select
+i.id as db_id,
+i.income_date as item_date,
+o.label as author,
+i.description,
+i.amount as price,
+i.last_updated as last_modified,
+'income' as category
+from income i, owner o
+where i.owner = o.name
+"></entity>
+                <entity name="expense" query="
+select
+e.id as db_id,
+e.expense_date as item_date,
+o.label as author,
+e.name as description,
+e.amount as price,
+e.last_updated as last_modified,
+'expense' as category
+from expense e, owner o
+where e.paid = o.name
+"></entity>
+                <entity name="detail" query="
+select
+d.id as db_id,
+d.detail_date as item_date,
+o.label as author,
+d.description,
+d.amount as price,
+d.last_updated as last_modified,
+e.name as category
+from detail d
+left join owner o
+on d.personal = o.name, expense e
+where d.expense_id = e.id
+"></entity>
+        </document>
+</dataConfig>

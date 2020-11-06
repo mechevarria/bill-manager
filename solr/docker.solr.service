@@ -1,0 +1,19 @@
+[Unit]
+Description=Solr Docker Service
+Requires=docker.mysql.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker rm solr
+ExecStart=/usr/bin/docker run \
+    --name=solr \
+    --mount type=bind,src=/home/vmuser/git/bill-manager/solr-core,dst=/opt/solr/server/solr/mycores/bills \
+    --network app-net \
+    -p 8983:8983 \
+    solr:7.7.3 \
+    solr-precreate \
+    bills
+ExecStop=/usr/bin/docker stop solr
+ExecReload=/usr/bin/docker restart solr
+
+[Install]
+WantedBy=multi-user.target
