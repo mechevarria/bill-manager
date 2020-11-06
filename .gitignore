@@ -14,3 +14,4 @@ target
 *.iml
 billDb.sql.gz
 mysql-data
+solr-core
