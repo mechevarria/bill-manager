@@ -120,32 +120,30 @@ sudo systemctl start docker.mysql
 ```
 
 
-### Install Solr
+### Install Solr Docker Service
 
-* Download [solr-7.7.2.tgz](https://www.apache.org/dyn/closer.lua/lucene/solr/7.7.2/solr-7.7.2.tgz) (or latest version)
-
-* Copy the archive to the root directory
-
+* Configure the container core directory with 
 ```bash
-sudo ./install_solr_service.sh ~/git/bill-manager/solr-7.7.2.tgz -u vmuser
+./solr/solr-configure.sh
 ```
 
-#### Configure Solr
+* Verify the `ExecStart` line in `solr/docker.solr.service` is the same as the working command in `solr/docker-solr.sh`
+
+* Install and enable the service
+
 ```bash
-/opt/solr/bin/./solr create -c bills
+sudo cp solr/docker.solr.service /etc/systemd/system
 
-mkdir /var/solr/data/bills/lib
+sudo systemctl daemon-reload
 
-cp /opt/solr/dist/solr-dataimporthandler-*.jar /var/solr/data/bills/lib
+sudo systemctl enable docker.solr
 
-cp /opt/solr/dist/solr-dataimporthandler-extras-*.jar /var/solr/data/bills/lib
-
-cp mysql-connector-java-*.jar /var/solr/data/bills/lib
-
-cp data-config.xml /var/solr/data/bills/conf/
+sudo systemctl start docker.solr
 ```
 
-* Edit `/var/solr/data/bills/conf/solrconfig.xml` and the code below to the **config** element
+#### Solr Configuration Details
+
+* The `/opt/solr/server/solr/mycores/bills/conf/solrconfig.xml` has the code added to the **config** element
 
 ```xml
 <requestHandler name="/dataimport" class="org.apache.solr.handler.dataimport.DataImportHandler">
@@ -155,13 +153,13 @@ cp data-config.xml /var/solr/data/bills/conf/
 </requestHandler>
 ```
 
-* Edit `/var/solr/data/bills/conf/managed-schema` and after this line
+* The `/opt/solr/server/solr/mycores/bills/conf/managed-schema` has after this line
 
 ```xml
 <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true" />
 ```
 
-* Insert this code block
+* The following block added
 
 ```xml
 <!-- ********** custom fields for bill-manager ********** -->
