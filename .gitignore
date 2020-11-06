@@ -12,3 +12,5 @@ target
 *.original
 *.log
 *.iml
+billDb.sql.gz
+mysql-data
