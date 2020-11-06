@@ -6,7 +6,7 @@ Requires=docker.service
 ExecStartPre=-/usr/bin/docker rm mysql
 ExecStart=/usr/bin/docker run \
     --name=mysql \
-    --mount type=bind,src=/home/vmuser/mysql-data,dst=/var/lib/mysql \
+    --mount type=bind,src=/home/vmuser/git/bill-manager/mysql-data,dst=/var/lib/mysql \
     --network app-net \
     -e MYSQL_ROOT_PASSWORD=root \
     -e MYSQL_DATABASE=billDb \
