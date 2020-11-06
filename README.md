@@ -67,7 +67,7 @@ sudo systemctl enable apache2
 
 sudo cp 000-default.conf /etc/apache2/sites-available
 
-sudo ln -s /home/vmuser/bill-manager/client/dist /var/www/html/client
+sudo ln -s /home/vmuser/git/bill-manager/client/dist /var/www/html/client
 
 sudo systemctl restart apache2
 ```
@@ -127,7 +127,7 @@ sudo systemctl start docker.mysql
 * Copy the archive to the root directory
 
 ```bash
-sudo ./install_solr_service.sh ~/bill-manager/solr-7.7.2.tgz -u vmuser
+sudo ./install_solr_service.sh ~/git/bill-manager/solr-7.7.2.tgz -u vmuser
 ```
 
 #### Configure Solr
@@ -190,7 +190,7 @@ grails assemble
 
 * Edit **grails.service** and make sure the path to executable jar is correct
 ```bash
-/usr/bin/java -jar /home/vmuser/bill-manager/grails-api/build/libs/grails-api-0.1.jar
+/usr/bin/java -jar /home/vmuser/git/bill-manager/grails-api/build/libs/grails-api-0.1.jar
 ```
 
 * Install and enable the service
