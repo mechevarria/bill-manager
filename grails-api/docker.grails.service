@@ -4,11 +4,7 @@ Requires=docker.mysql.service
 
 [Service]
 ExecStartPre=/usr/bin/docker rm grails
-ExecStart=/usr/bin/docker run \
-    --name=grails \
-    --network app-net \
-    -p 8080:8080 \
-    quay.io/mechevarria/grails-api:latest
+ExecStart=/usr/bin/docker run --name=grails --network app-net -p 8080:8080 quay.io/mechevarria/grails-api:latest
 ExecStop=/usr/bin/docker stop grails
 ExecReload=/usr/bin/docker restart grails
 
