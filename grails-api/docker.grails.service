@@ -3,7 +3,7 @@ Description=Grails Docker Service
 Requires=docker.mysql.service
 
 [Service]
-ExecStartPre=-/usr/bin/docker rm grails
+ExecStartPre=/usr/bin/docker rm grails
 ExecStart=/usr/bin/docker run \
     --name=grails \
     --network app-net \
