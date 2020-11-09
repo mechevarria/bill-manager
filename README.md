@@ -177,34 +177,32 @@ sudo systemctl start docker.solr
 <!-- ********** end custom fields ********** -->
 ```
 
-### Deploy Grails REST API
+### Deploy Grails Docker API
 
-* Follow the sdkman instructions [here](https://www.grails.org/download.html)
-
-* Inside the **grails-api** directory, build an executable jar
+* Inside the **grails-api** directory, build a container with
 ```bash
-grails assemble
+./docker-build.sh
 ```
 
-* Edit **grails.service** and make sure the path to executable jar is correct
+* Verify the containers runs with
 ```bash
-/usr/bin/java -jar /home/vmuser/git/bill-manager/grails-api/build/libs/grails-api-0.1.jar
+./docker-grails.sh
 ```
 
 * Install and enable the service
 ```bash
-sudo cp grails.service /etc/systemd/system
+sudo cp docker.grails.service /etc/systemd/system
 
 sudo systemctl daemon-reload
 
-sudo systemctl enable grails
+sudo systemctl enable docker.grails
 
-sudo systemctl start grails
+sudo systemctl start docker.grails
 ```
 
 * View logs from stdout with
 ```bash
-sudo journalctl -u grails.service -f
+sudo journalctl -u docker.grails.service -f
 ```
 
 #### Upgrade Grails
