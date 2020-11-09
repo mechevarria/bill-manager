@@ -1,9 +1,0 @@
-[Unit]
-Description=Grails REST API
-
-[Service]
-ExecStart=/usr/bin/java -jar /home/vmuser/git/bill-manager/grails-api/build/libs/grails-api-0.1.jar
-User=vmuser
-
-[Install]
-WantedBy=multi-user.target
