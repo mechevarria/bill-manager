@@ -11,5 +11,6 @@ ExecStart=/usr/bin/docker run \
     quay.io/mechevarria/grails-api:latest
 ExecStop=/usr/bin/docker stop grails
 ExecReload=/usr/bin/docker restart grails
+
 [Install]
 WantedBy=multi-user.target
