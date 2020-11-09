@@ -3,7 +3,7 @@ Description=MySQL Docker Service
 Requires=docker.service
 
 [Service]
-ExecStartPre=-/usr/bin/docker rm mysql
+ExecStartPre=/usr/bin/docker rm mysql
 ExecStart=/usr/bin/docker run \
     --name=mysql \
     --mount type=bind,src=/home/vmuser/git/bill-manager/mysql-data,dst=/var/lib/mysql \
