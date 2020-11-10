@@ -230,13 +230,9 @@ grails create-controller api.Bill
 
 * Inside the **client** directory run
 ```bash
-npm install -g grunt-cli
-
-npm install -g bower
-
 npm install
 
-bower install
+npx bower install
 
-grunt build
+npx grunt build
 ```
