@@ -39,6 +39,7 @@
   },
   "scripts": {
     "test": "grunt test",
-    "preinstall": "npx npm-force-resolutions"
+    "preinstall": "npx npm-force-resolutions",
+    "install": "node ./node_modules/protractor/bin/webdriver-manager update"
   }
 }
