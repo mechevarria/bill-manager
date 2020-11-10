@@ -16,5 +16,6 @@ docker run \
     -e MYSQL_DATABASE=billDb \
     -e MYSQL_USER=app \
     -e MYSQL_PASSWORD=app \
+    -e TZ=America/New_York \
     -p 3306:3306 \
     mysql/mysql-server:latest
