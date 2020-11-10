@@ -44,7 +44,7 @@ class BillController {
         try {
 
             log.info("Saving $bill.month - $bill.year")
-            bill.billDate = new SimpleDateFormat("dd-MMMM-yyyy").parse("01-$bill.month-$bill.year")
+            bill.billDate = new SimpleDateFormat("dd-MMMM-yyyy").parse("02-$bill.month-$bill.year")
 
             bill.expenses.each { expense ->
                 expense.details.each { detail ->
