@@ -34,8 +34,12 @@
   "engines": {
     "node": ">=0.10.0"
   },
+  "resolutions": {
+    "graceful-fs": "^4.2.2"
+  },
   "scripts": {
     "test": "grunt test",
+    "preinstall": "npx npm-force-resolutions",
     "install": "node ./node_modules/protractor/bin/webdriver-manager update"
   }
 }
