@@ -1,5 +1,5 @@
 [Unit]
-Description=Grails Docker Service
+Description=grails docker Service
 Requires=docker.mysql.service
 
 [Service]
