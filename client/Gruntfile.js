@@ -88,11 +88,18 @@ module.exports = function(grunt) {
                 },
                 proxies: [{
                     context: '/solr',
-                    host: 'localhost'
+                    host: 'localhost',
+                    port: 8983,
+                    rewrite: {
+                        '^/solr': ''
+                    }
                 }, {
                     context: '/api',
                     host: 'localhost',
-                    port: 8080
+                    port: 8080,
+                    rewrite: {
+                        '^/api': ''
+                    }
                 }]
             },
             test: {
