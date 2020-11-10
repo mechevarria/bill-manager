@@ -2,12 +2,16 @@
 
 app.controller('BillCtrl', function($scope, $uibModal, $rootScope, BillSrvc, DefaultsSrvc, SearchSrvc) {
 
-    function load() {
+    function loadDefaults() {
         $scope.defaults = {};
 
         DefaultsSrvc.get().then(function(data) {
             $scope.defaults = data;
         });
+
+    }
+    function load() {
+        loadDefaults();
 
         // defaults
         var tableState = {
@@ -31,17 +35,9 @@ app.controller('BillCtrl', function($scope, $uibModal, $rootScope, BillSrvc, Def
         var start = pagination.start;
         var number = pagination.number;
 
-        var sort = tableState.sort;
-        var column = sort.predicate;
+        var column = 'billDate';
 
-        var order = '';
-        var reverse =  sort.reverse; // smart-table sends either true, false or ''
-        if(reverse === true) {
-            order = 'desc';
-        }
-        if(reverse === false) {
-            order = 'asc';
-        }
+        var order = 'desc';
 
         BillSrvc.getBills(start, number, column, order).then(function(result) {
             $scope.bills = result.bills;
@@ -137,8 +133,7 @@ app.controller('BillCtrl', function($scope, $uibModal, $rootScope, BillSrvc, Def
         return color;
     };
 
-    // on page load
-    load();
+    loadDefaults();
 
     $scope.hideList = false;
     $scope.hideAdd = true;
