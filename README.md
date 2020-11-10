@@ -21,58 +21,15 @@ sudo dpkg-reconfigure tzdata
 sudo usermod vmuser -a -G docker
 ```
 
-### Install JDK
-
-```bash
-sudo apt-get install -y openjdk-8-jdk
-```
-
-* Set **JAVA_HOME** in `~/.profile`
-```bash
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-```
-
 ### Install node.js
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 
 sudo apt-get install -y nodejs
-
-mkdir ~/.npm
-
-mkdir ~/.npm-cache
-
-npm config set prefix ~/.npm
-
-npm config set cache ~/.npm-cache
 ```
 
-* Add nodejs global modules to path in `~/.profile`
-
-```bash
-export PATH=${PATH}:~/.npm/bin
-```
-
-### Install Apache Web Server
-
-```bash
-sudo apt-get install -y apache2
-
-sudo a2enmod proxy
-
-sudo a2enmod proxy_http
-
-sudo systemctl enable apache2
-
-sudo cp 000-default.conf /etc/apache2/sites-available
-
-sudo ln -s /home/vmuser/git/bill-manager/client/dist /var/www/html/client
-
-sudo systemctl restart apache2
-```
-
-### Setup MySQL Docker Service
+### Setup MySQL docker Service
 
 * Test that the mysql docker service will work with
 
@@ -120,7 +77,7 @@ sudo systemctl start docker.mysql
 ```
 
 
-### Install Solr Docker Service
+### Install Solr docker Service
 
 * Configure the container core directory with 
 ```bash
@@ -177,7 +134,7 @@ sudo systemctl start docker.solr
 <!-- ********** end custom fields ********** -->
 ```
 
-### Deploy Grails Docker API
+### Deploy Grails docker API
 
 * Inside the **grails-api** directory, build a container with
 ```bash
@@ -226,13 +183,46 @@ grails create-controller api.Bill
 
 * Update **application.yaml** and **build.gradle**
 
-### Deploy AngularJS client
+### Setup nginx docker service
 
-* Inside the **client** directory run
+* Build client project
+
 ```bash
 npm install
-
 npx bower install
-
 npx grunt build
 ```
+
+* Build the nginx container from the client build output in `./client/dist`
+
+```bash
+client/docker-build.sh
+```
+
+* Make sure the client runs with
+```bash
+client/docker-nginx.sh
+```
+
+* The application will be running on [http://localhost](http://localhost)
+
+* Install and enable the service
+
+```bash
+sudo cp client/docker.nginx.service /etc/systemd/system
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable docker.nginx
+
+sudo systemctl start docker.nginx
+```
+
+#### AngularJS client development
+
+* Inside the `client` directory run
+```bash
+npx grunt serve
+```
+
+* A livereload development server will be available at [http://localhost:9000](http://localhost:9000)
