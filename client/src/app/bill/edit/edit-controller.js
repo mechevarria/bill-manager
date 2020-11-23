@@ -45,53 +45,33 @@ app.controller('EditCtrl', function($scope, $uibModal, $rootScope, localStorageS
         return total;
     }
 
-    function getHigherIncome(owner1Income, owner2Income) {
-        if (owner1Income > owner2Income) {
-            return $scope.defaults.owners[0].id;
-        } else {
-            return $scope.defaults.owners[1].id;
-        }
-    }
+    function getPercentages(owner1Income, owner2Income) {
+        var total = owner1Income + owner2Income;
 
-    function getPercent(owner1Income, owner2Income, higherIncome) {
-        var percent = 0;
-        var difference = 0;
-
-        if (higherIncome == $scope.defaults.owners[0].id) {
-            difference = owner1Income - owner2Income;
-            percent = difference / owner1Income;
-        } else {
-            difference = owner2Income - owner1Income;
-            percent = difference / owner2Income;
-        }
+        var percent = {
+            owner1: (owner1Income / total).toFixed(2),
+            owner2: (owner2Income / total).toFixed(2)
+        };
 
         return percent;
     }
 
-    function getIncomeDiff(higherIncome, percent) {
+    function getIncomeDiff(percent) {
 
-        var formattedPercent = Math.round(percent * 100 * 100) / 100;
-        var name = '';
+        var owner1 = $scope.defaults.owners[0].label;
+        var owner2 = $scope.defaults.owners[1].label;
 
-        angular.forEach($scope.defaults.owners, function(owner) {
-            if (owner.id == higherIncome) {
-                name = owner.label;
-            }
-        });
+        var owner1Percent = percent.owner1 * 100;
+        var owner2Percent = percent.owner2 * 100;
 
-        return name + ' has ' + formattedPercent + '%' + ' more income.';
+        var msg = owner1 + ' has ' + owner1Percent + '% and ' + owner2 + ' has ' + owner2Percent + '% of monthly income'
+
+        return msg
     }
 
-    function setShare(higherIncome, percent, totalShared) {
-
-        if (higherIncome == $scope.defaults.owners[0].id) {
-            $scope.toEdit.owner2Shared = totalShared / (2 + percent);
-            $scope.toEdit.owner1Shared = totalShared - $scope.toEdit.owner2Shared;
-        } else {
-            $scope.toEdit.owner1Shared = totalShared / (2 + percent);
-            $scope.toEdit.owner2Shared = totalShared - $scope.toEdit.owner1Shared;
-        }
-
+    function setShare(percentages, totalShared) {
+        $scope.toEdit.owner1Shared = percentages.owner1 * totalShared;
+        $scope.toEdit.owner2Shared = percentages.owner2 * totalShared;
     }
 
     function getPaid(owner) {
@@ -135,13 +115,12 @@ app.controller('EditCtrl', function($scope, $uibModal, $rootScope, localStorageS
         $scope.toEdit.owner2Personal = getPersonal($scope.defaults.owners[1].name, $scope.toEdit.expenses);
         $scope.toEdit.totalPersonal = $scope.toEdit.owner1Personal + $scope.toEdit.owner2Personal;
 
-        var higherIncome = getHigherIncome($scope.toEdit.owner1Income, $scope.toEdit.owner2Income);
-        var percent = getPercent($scope.toEdit.owner1Income, $scope.toEdit.owner2Income, higherIncome);
+        var percentages = getPercentages($scope.toEdit.owner1Income, $scope.toEdit.owner2Income);
 
-        $scope.incomeDiff = getIncomeDiff(higherIncome, percent);
+        $scope.incomeDiff = getIncomeDiff(percentages);
         $scope.toEdit.totalExpense = getTotalExpense($scope.toEdit.expenses);
         $scope.toEdit.totalShared = $scope.toEdit.totalExpense - $scope.toEdit.totalPersonal;
-        setShare(higherIncome, percent, $scope.toEdit.totalShared);
+        setShare(percentages, $scope.toEdit.totalShared);
 
         $scope.toEdit.owner1Total = $scope.toEdit.owner1Income - $scope.toEdit.owner1Personal - $scope.toEdit.owner1Shared;
         $scope.toEdit.owner2Total = $scope.toEdit.owner2Income - $scope.toEdit.owner2Personal - $scope.toEdit.owner2Shared;
