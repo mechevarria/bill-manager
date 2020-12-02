@@ -6,6 +6,8 @@ docker network create app-net
 docker rm solr
 
 docker run \
+    --rm \
+    -d \
     --name=solr \
     --network app-net \
     --mount type=bind,src=${HOME}/git/bill-manager/solr-core,dst=/opt/solr/server/solr/mycores/bills \

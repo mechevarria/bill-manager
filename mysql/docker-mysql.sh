@@ -9,6 +9,8 @@ docker network create app-net
 docker rm mysql
 
 docker run \
+    --rm \
+    -d \
     --name=mysql \
     --network app-net \
     --mount type=bind,src=${HOME}/git/bill-manager/mysql-data,dst=/var/lib/mysql \

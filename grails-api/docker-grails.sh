@@ -6,6 +6,8 @@ docker network create app-net
 docker rm grails
 
 docker run \
+    --rm \
+    -d \
     --name=grails \
     --network app-net \
     -p 8080:8080 \

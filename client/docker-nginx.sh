@@ -6,6 +6,8 @@ docker network create app-net
 docker rm nginx
 
 docker run \
+    --rm \
+    -d \
     --name=nginx \
     --network app-net \
     -p 80:80 \
