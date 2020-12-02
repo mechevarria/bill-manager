@@ -6,7 +6,7 @@ cd mysql
 cd ../solr
 ./docker-solr.sh
 
-cd ../grails-app
+cd ../grails-api
 ./docker-grails.sh
 
 cd ../client

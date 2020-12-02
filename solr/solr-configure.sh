@@ -3,8 +3,6 @@
 # # create network for other containers to communicate via name
 docker network create app-net
 
-docker rm solr
-
 docker run \
     --rm \
     --name=solr \
