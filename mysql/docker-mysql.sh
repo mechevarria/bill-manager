@@ -11,7 +11,7 @@ docker run \
     -d \
     --name=mysql \
     --network app-net \
-    --mount type=bind,src=${PWD}/mysql-data,dst=/var/lib/mysql \
+    --mount type=bind,src=${PWD}/../mysql-data,dst=/var/lib/mysql \
     -e MYSQL_ROOT_PASSWORD=root \
     -e MYSQL_DATABASE=billDb \
     -e MYSQL_USER=app \
