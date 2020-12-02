@@ -15,7 +15,7 @@ docker run \
     bills &
 
 echo "Waiting for container to start"
-sleep 7
+sleep 15
 echo "Copying configuration to container"
 
 core=/opt/solr/server/solr/mycores/bills
