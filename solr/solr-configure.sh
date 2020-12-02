@@ -6,6 +6,7 @@ docker network create app-net
 docker rm solr
 
 docker run \
+    --rm \
     --name=solr \
     --network app-net \
     -p 8983:8983 \
