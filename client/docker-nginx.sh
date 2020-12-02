@@ -10,5 +10,5 @@ docker run \
     -d \
     --name=nginx \
     --network app-net \
-    -p 80:80 \
+    -p 8000:80 \
     quay.io/mechevarria/nginx-client:latest
