@@ -3,8 +3,7 @@ Description=nginx docker service
 Requires=docker.grails.service
 
 [Service]
-ExecStartPre=/usr/bin/docker rm nginx
-ExecStart=/usr/bin/docker run --name=nginx --network app-net -p 80:80 quay.io/mechevarria/nginx-client:latest
+ExecStart=/usr/bin/docker run --rm --name=nginx --network app-net -p 80:80 quay.io/mechevarria/nginx-client:latest
 ExecStop=/usr/bin/docker stop nginx
 ExecReload=/usr/bin/docker restart nginx
 

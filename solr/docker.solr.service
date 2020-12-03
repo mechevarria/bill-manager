@@ -3,8 +3,8 @@ Description=Solr Docker Service
 Requires=docker.mysql.service
 
 [Service]
-ExecStartPre=/usr/bin/docker rm solr
 ExecStart=/usr/bin/docker run \
+    --rm \
     --name=solr \
     --mount type=bind,src=/home/vmuser/git/bill-manager/solr-core,dst=/opt/solr/server/solr/mycores/bills \
     --network app-net \
