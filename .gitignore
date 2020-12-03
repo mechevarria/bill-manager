@@ -15,3 +15,11 @@ target
 billDb.sql.gz
 mysql-data
 solr-core
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.project
+.classpath
+.factorypath
+.settings
