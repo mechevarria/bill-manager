@@ -23,13 +23,12 @@ public class DefaultsService {
     private EntityManager em;
 
     public Defaults get() {
-        TypedQuery<Long> query = em.createQuery("select d.id from Defaults d", Long.class);
-        Long defaultsId = query.getSingleResult();
-        Defaults defaults = em.find(Defaults.class, defaultsId);
-        if (defaults != null) {
+        try {
+            Long defaultsId = em.createQuery("select d.id from Defaults d", Long.class).getSingleResult();
+            Defaults defaults = em.find(Defaults.class, defaultsId);
             return defaults;
-        } else {
-            logger.warn("Defaults not found, creating new");
+        } catch (Exception ex) {
+            logger.warn(ex.getMessage());
             return getNew();
         }
     }
