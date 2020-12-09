@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>org.billmanager</groupId>
 	<artifactId>springboot-api</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<name>springboot-api</name>
 	<description>rest api for billmanager</description>
 
