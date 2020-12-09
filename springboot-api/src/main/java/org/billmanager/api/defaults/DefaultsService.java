@@ -5,27 +5,25 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 @Service
-@Repository
-@Transactional
 public class DefaultsService {
     private static final Logger logger = LoggerFactory.getLogger(DefaultsService.class);
 
-    @PersistenceContext
-    private EntityManager em;
+    @Autowired
+    private DefaultsRepository repository;
 
     public Defaults get() {
         try {
-            Long defaultsId = em.createQuery("select d.id from Defaults d", Long.class).getSingleResult();
-            Defaults defaults = em.find(Defaults.class, defaultsId);
+            Long defaultsId = repository.findId();
+            Defaults defaults = repository.findById(defaultsId).get();
             return defaults;
         } catch (Exception ex) {
             logger.warn(ex.getMessage());
@@ -52,7 +50,7 @@ public class DefaultsService {
         defaults.setOwners(owners);
 
         try {
-            em.persist(defaults);
+            repository.save(defaults);
             return defaults;
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -62,10 +60,10 @@ public class DefaultsService {
 
     public Defaults update(Defaults defaults) {
         try {
-            Defaults existing = em.find(Defaults.class, defaults.getId());
-            existing = em.merge(defaults);
-            em.flush();
-            return existing;
+            // make sure we do not insert a new record
+            repository.findById(defaults.getId()).get();
+            defaults = repository.save(defaults);
+            return defaults;
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             return null;
