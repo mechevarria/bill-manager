@@ -107,35 +107,37 @@ app.controller('EditCtrl', function($scope, $uibModal, $rootScope, localStorageS
 
     // this function does too much.  Needs to be re-written
     $scope.update = function() {
-        $scope.toEdit.owner1Income = getIncome($scope.defaults.owners[0].name, $scope.toEdit.incomes);
-        $scope.toEdit.owner2Income = getIncome($scope.defaults.owners[1].name, $scope.toEdit.incomes);
-        $scope.toEdit.totalIncome = $scope.toEdit.owner1Income + $scope.toEdit.owner2Income;
+        if($scope.defaults.owners) {
+            $scope.toEdit.owner1Income = getIncome($scope.defaults.owners[0].name, $scope.toEdit.incomes);
+            $scope.toEdit.owner2Income = getIncome($scope.defaults.owners[1].name, $scope.toEdit.incomes);
+            $scope.toEdit.totalIncome = $scope.toEdit.owner1Income + $scope.toEdit.owner2Income;
 
-        $scope.toEdit.owner1Personal = getPersonal($scope.defaults.owners[0].name, $scope.toEdit.expenses);
-        $scope.toEdit.owner2Personal = getPersonal($scope.defaults.owners[1].name, $scope.toEdit.expenses);
-        $scope.toEdit.totalPersonal = $scope.toEdit.owner1Personal + $scope.toEdit.owner2Personal;
+            $scope.toEdit.owner1Personal = getPersonal($scope.defaults.owners[0].name, $scope.toEdit.expenses);
+            $scope.toEdit.owner2Personal = getPersonal($scope.defaults.owners[1].name, $scope.toEdit.expenses);
+            $scope.toEdit.totalPersonal = $scope.toEdit.owner1Personal + $scope.toEdit.owner2Personal;
 
-        var percentages = getPercentages($scope.toEdit.owner1Income, $scope.toEdit.owner2Income);
+            var percentages = getPercentages($scope.toEdit.owner1Income, $scope.toEdit.owner2Income);
 
-        $scope.incomeDiff = getIncomeDiff(percentages);
-        $scope.toEdit.totalExpense = getTotalExpense($scope.toEdit.expenses);
-        $scope.toEdit.totalShared = $scope.toEdit.totalExpense - $scope.toEdit.totalPersonal;
-        setShare(percentages, $scope.toEdit.totalShared);
+            $scope.incomeDiff = getIncomeDiff(percentages);
+            $scope.toEdit.totalExpense = getTotalExpense($scope.toEdit.expenses);
+            $scope.toEdit.totalShared = $scope.toEdit.totalExpense - $scope.toEdit.totalPersonal;
+            setShare(percentages, $scope.toEdit.totalShared);
 
-        $scope.toEdit.owner1Total = $scope.toEdit.owner1Income - $scope.toEdit.owner1Personal - $scope.toEdit.owner1Shared;
-        $scope.toEdit.owner2Total = $scope.toEdit.owner2Income - $scope.toEdit.owner2Personal - $scope.toEdit.owner2Shared;
-        $scope.toEdit.total = $scope.toEdit.owner1Total + $scope.toEdit.owner2Total;
+            $scope.toEdit.owner1Total = $scope.toEdit.owner1Income - $scope.toEdit.owner1Personal - $scope.toEdit.owner1Shared;
+            $scope.toEdit.owner2Total = $scope.toEdit.owner2Income - $scope.toEdit.owner2Personal - $scope.toEdit.owner2Shared;
+            $scope.toEdit.total = $scope.toEdit.owner1Total + $scope.toEdit.owner2Total;
 
-        $scope.toEdit.owner1Paid = getPaid($scope.defaults.owners[0].name);
-        $scope.toEdit.owner2Paid = getPaid($scope.defaults.owners[1].name);
+            $scope.toEdit.owner1Paid = getPaid($scope.defaults.owners[0].name);
+            $scope.toEdit.owner2Paid = getPaid($scope.defaults.owners[1].name);
 
-        $scope.toEdit.owner1Owe = $scope.toEdit.owner1Personal + $scope.toEdit.owner1Shared - $scope.toEdit.owner1Paid;
-        $scope.toEdit.owner1Owe = Math.round($scope.toEdit.owner1Owe * 100) / 100;
+            $scope.toEdit.owner1Owe = $scope.toEdit.owner1Personal + $scope.toEdit.owner1Shared - $scope.toEdit.owner1Paid;
+            $scope.toEdit.owner1Owe = Math.round($scope.toEdit.owner1Owe * 100) / 100;
 
-        $scope.toEdit.owner2Owe = $scope.toEdit.owner2Personal + $scope.toEdit.owner2Shared - $scope.toEdit.owner2Paid;
-        $scope.toEdit.owner2Owe = Math.round($scope.toEdit.owner2Owe * 100) / 100;
+            $scope.toEdit.owner2Owe = $scope.toEdit.owner2Personal + $scope.toEdit.owner2Shared - $scope.toEdit.owner2Paid;
+            $scope.toEdit.owner2Owe = Math.round($scope.toEdit.owner2Owe * 100) / 100;
 
-        $scope.toEdit.settlement = getSettlement($scope.toEdit.owner1Owe, $scope.toEdit.owner2Owe);
+            $scope.toEdit.settlement = getSettlement($scope.toEdit.owner1Owe, $scope.toEdit.owner2Owe);
+        }
 
     };
 
