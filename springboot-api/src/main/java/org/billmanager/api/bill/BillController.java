@@ -1,6 +1,7 @@
 package org.billmanager.api.bill;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,16 @@ public class BillController {
             return ResponseEntity.ok().body(results);
         } else {
             return ResponseEntity.status(500).body("Could not get bills");
+        }
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<Object> summary() {
+        List<Bill> bills = billService.summary();
+        if (bills != null) {
+            return ResponseEntity.ok().body(bills);
+        } else {
+            return ResponseEntity.status(500).body("Could not get summary");
         }
     }
 

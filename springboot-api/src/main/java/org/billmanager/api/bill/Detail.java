@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +35,8 @@ public class Detail implements java.io.Serializable {
     private String description;
     private Double amount = 0.0;
     private String personal;
+    
+    @UpdateTimestamp
     private Date lastUpdated;
 
     @ManyToOne

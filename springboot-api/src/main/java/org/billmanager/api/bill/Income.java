@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,6 +34,8 @@ public class Income implements java.io.Serializable {
     private Date incomeDate;
     private String month;
     private String year;
+    
+    @UpdateTimestamp
     private Date lastUpdated;
 
     @ManyToOne

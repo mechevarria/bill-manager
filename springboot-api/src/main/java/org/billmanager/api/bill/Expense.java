@@ -15,6 +15,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,6 +40,8 @@ public class Expense implements java.io.Serializable {
     private Double amount = 0.00;
     private String paid;
     private Boolean hasDetails = false;
+    
+    @UpdateTimestamp
     private Date lastUpdated;
 
     @ManyToOne
