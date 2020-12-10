@@ -40,7 +40,7 @@ app.factory('SearchSrvc', function($http, $q) {
             .success(function(data) {
                 deferred.resolve({
                     'type': 'info',
-                    'msg': data.statusMessages['Total Documents Processed'] + ' records updated for search'
+                    'msg': data.command + ' command posted'
                 });
             })
             .error(function(data) {
