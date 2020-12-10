@@ -39,6 +39,11 @@ app.controller('ExportModalCtrl', function ($scope, $uibModalInstance, $timeout,
         delete income.defaults;
         return income;
       });
+      data.owners.map(owner => {
+        delete owner.id;
+        delete owner.defaults;
+        return owner;
+      })
 
       $scope.exportData.defaults = data;
       $scope.processed++;
