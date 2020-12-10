@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +51,16 @@ public class BillController {
             return ResponseEntity.ok().body(bill);
         } else {
             return ResponseEntity.status(500).body("Could not save bill");
+        }
+    }
+
+    @PutMapping("/bill/{id}")
+    public ResponseEntity<Object> update(@RequestBody Bill bill, @PathVariable String id) {
+        bill = billService.save(bill);
+        if (bill != null) {
+            return ResponseEntity.ok().body(bill);
+        } else {
+            return ResponseEntity.status(500).body("Could not update bill");
         }
     }
 
