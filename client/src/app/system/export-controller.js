@@ -29,17 +29,17 @@ app.controller('ExportModalCtrl', function ($scope, $uibModalInstance, $timeout,
     };
 
     DefaultsSrvc.get().then(function (data) {
-      data.expenses.map(expense => {
+      data.expenses.map(function(expense) {
         delete expense.id;
         delete expense.defaults;
         return expense;
       });
-      data.incomes.map(income => {
+      data.incomes.map(function(income) {
         delete income.id;
         delete income.defaults;
         return income;
       });
-      data.owners.map(owner => {
+      data.owners.map(function(owner) {
         delete owner.id;
         delete owner.defaults;
         return owner;
@@ -59,17 +59,17 @@ app.controller('ExportModalCtrl', function ($scope, $uibModalInstance, $timeout,
       BillSrvc.get(id).then(function (data) {
         delete data.id;
 
-        data.expenses.map(expense => {
+        data.expenses.map(function(expense) {
           delete expense.id;
           delete expense.bill;
-          expense.details.map(detail => {
+          expense.details.map(function(detail) {
             delete detail.id;
             delete detail.expense;
             return detail;
           });
           return expense;
         });
-        data.incomes.map(income => {
+        data.incomes.map(function(income) {
           delete income.id;
           delete income.bill;
           return income;
