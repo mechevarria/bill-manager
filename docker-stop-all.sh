@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker stop nginx grails solr mysql
+docker stop nginx springboot solr mysql

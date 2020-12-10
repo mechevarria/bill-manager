@@ -8,8 +8,8 @@ cd mysql
 cd ../solr
 ./docker-solr.sh
 
-cd ../grails-api
-./docker-grails.sh
+cd ../springboot-api
+./docker-springboot.sh
 
 cd ../client
 ./docker-nginx.sh
