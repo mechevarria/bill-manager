@@ -152,11 +152,11 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
         else {
           var detail = {
             'date': moment(line[0], 'M/DD/YYYY').format('L'),
-            'reference': line[8],
+            'reference': line[11],
             'description': line[1],
             'amount': getAmount(line[4]),
-            'type': line[9],
-            'personal': line[10]
+            'type': line[12],
+            'personal': line[13]
           };
         }
 
