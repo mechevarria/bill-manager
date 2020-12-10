@@ -66,7 +66,7 @@ public class BillService {
                 expense.getDetails().forEach(detail -> {
                     if(detail.getDate() != null) {
                         try {
-                            detail.setDate(new SimpleDateFormat("MM/dd/yyyy").parse(detail.getDate()).toString());
+                            detail.setDetailDate(new SimpleDateFormat("MM/dd/yyyy").parse(detail.getDate()));
                         } catch (Exception ex) {
                             logger.error(ex.getMessage(), ex);
                             detail.setDate(null);
