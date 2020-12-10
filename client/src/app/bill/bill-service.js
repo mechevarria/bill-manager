@@ -155,7 +155,7 @@ app.factory('BillSrvc', function ($http, $q) {
 
       // first entry is the bill id
       angular.forEach(data, function(bill) {
-        ids.push(bill[0]);
+        ids.push(bill.id);
       });
 
       deferred.resolve(ids);
