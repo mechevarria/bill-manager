@@ -29,6 +29,17 @@ app.controller('ExportModalCtrl', function ($scope, $uibModalInstance, $timeout,
     };
 
     DefaultsSrvc.get().then(function (data) {
+      data.expenses.map(expense => {
+        delete expense.id;
+        delete expense.defaults;
+        return expense;
+      });
+      data.incomes.map(income => {
+        delete income.id;
+        delete income.defaults;
+        return income;
+      });
+
       $scope.exportData.defaults = data;
       $scope.processed++;
 
@@ -41,6 +52,24 @@ app.controller('ExportModalCtrl', function ($scope, $uibModalInstance, $timeout,
       var id = idList[$scope.processed - 1];
 
       BillSrvc.get(id).then(function (data) {
+        delete data.id;
+
+        data.expenses.map(expense => {
+          delete expense.id;
+          delete expense.bill;
+          expense.details.map(detail => {
+            delete detail.id;
+            delete detail.expense;
+            return detail;
+          });
+          return expense;
+        });
+        data.incomes.map(income => {
+          delete income.id;
+          delete income.bill;
+          return income;
+        });
+  
         $scope.exportData.bills.push(data);
         $scope.processed++;
 
