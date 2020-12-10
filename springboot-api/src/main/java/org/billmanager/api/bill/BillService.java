@@ -102,6 +102,15 @@ public class BillService {
         }
     }
 
+    public Bill get(Long id) {
+        try {
+            return repository.findById(id).get();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            return null;
+        }
+    }
+
     public String delete(Long id) {
         try {
             Bill bill = repository.findById(id).get();

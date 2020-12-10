@@ -53,11 +53,23 @@ public class BillController {
         }
     }
 
+    @GetMapping("/bill/{id}")
+    public ResponseEntity<Object> get(@PathVariable String id) {
+        Bill bill = billService.get(Long.valueOf(id));
+        if (bill != null) {
+            return ResponseEntity.ok().body(bill);
+        } else {
+            return ResponseEntity.status(500).body("Could get bill ID=" + id);
+        }
+    }
+
     @DeleteMapping("/bill/{id}")
     public ResponseEntity<Object> delete(@PathVariable String id) {
         String msg = billService.delete(Long.valueOf(id));
         if (msg != null) {
-            return ResponseEntity.ok().body(msg);
+            Map<String, Object> result = new HashMap<>();
+            result.put("text", msg);
+            return ResponseEntity.ok().body(result);
         } else {
             return ResponseEntity.status(500).body("Could delete bill ID=" + id);
         }
