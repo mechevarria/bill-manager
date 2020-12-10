@@ -109,7 +109,8 @@ app.controller('DetailsCtrl', function ($scope, $uibModal, $rootScope, CsvSrvc) 
 
     if (_.includes(['ONLINE PAYMENT - THANK YOU',
                     'ONLINE PYMT-THANK YOU    ATLANTA      GA',
-                    'AUTOMATIC PAYMENT - THANK YOU'], detail.description)) {
+                    'AUTOMATIC PAYMENT - THANK YOU',
+                    'MOBILE PAYMENT - THANK YOU'], detail.description)) {
       return false;
     }
 
