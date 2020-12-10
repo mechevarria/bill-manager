@@ -19,6 +19,10 @@ app.factory('BillSrvc', function ($http, $q) {
 
     var url = resource;
 
+    if (offset > 0) {
+      offset = offset / max;
+    }
+
     var config = {
       params: {
         size: max,
@@ -116,7 +120,7 @@ app.factory('BillSrvc', function ($http, $q) {
       success(function (msg) {
         response = {
           type: 'success',
-          msg: msg
+          msg: msg.text
         };
 
         deferred.resolve(response);
@@ -137,24 +141,7 @@ app.factory('BillSrvc', function ($http, $q) {
     var deferred = $q.defer();
 
     $http.get('/api/summary').success(function (data) {
-      var bills = [];
-
-      // Query: select b.id, b.billDate, b.year, b.totalExpense, b.totalIncome from Bill b
-      angular.forEach(data, function(item) {
-
-        var bill = {
-          id: item[0],
-          billDate: item[1],
-          year: item[2],
-          totalExpense: item[3],
-          totalIncome: item[4]
-        };
-
-        bills.push(bill);
-      });
-
-
-      deferred.resolve(bills);
+      deferred.resolve(data);
     });
 
     return deferred.promise;
