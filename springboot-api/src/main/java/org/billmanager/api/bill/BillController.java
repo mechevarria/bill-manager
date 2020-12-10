@@ -57,9 +57,7 @@ public class BillController {
     public ResponseEntity<Object> delete(@PathVariable String id) {
         String msg = billService.delete(Long.valueOf(id));
         if (msg != null) {
-            Map<String, String> result = new HashMap<>();
-            result.put("text", msg);
-            return ResponseEntity.ok().body(result);
+            return ResponseEntity.ok().body(msg);
         } else {
             return ResponseEntity.status(500).body("Could delete bill ID=" + id);
         }
