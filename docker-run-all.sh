@@ -8,6 +8,8 @@ cd mysql
 cd ../solr
 ./docker-solr.sh
 
+sleep 3
+
 cd ../springboot-api
 ./docker-springboot.sh
 
