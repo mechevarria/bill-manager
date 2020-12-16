@@ -1,17 +1,9 @@
 bill-manager
 =============
 
-Angular client and Grails api application to manage monthly expenses/income
+Angular client and Springboot api application to manage monthly expenses/income with a MySQL backend and search provided by Solr
 
 ## Installation Steps
-
-* Download and install [Ubuntu Server](https://ubuntu.com/download/server)
-
-* Make sure timezone is local and not UTC to prevent database save/import errors
-
-```bash
-sudo dpkg-reconfigure tzdata
-```
 
 * Install [docker-ce](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
 
@@ -29,9 +21,9 @@ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-### Setup MySQL docker Service
+### Setup MySQL docker
 
-* Test that the mysql docker service will work with
+* Test that mysql docker will work with
 
 ```bash
 mysql/docker-mysql.sh
@@ -40,20 +32,6 @@ mysql/docker-mysql.sh
 * After making sure the container runs you can stop the container with 
 ```bash
 docker stop mysql
-```
-
-* Verify the `ExecStart` line in `mysql/docker.mysql.service` is the same as the working command in `mysql/docker-mysql.sh`
-
-* Install and enable the service
-
-```bash
-sudo cp mysql/docker.mysql.service /etc/systemd/system
-
-sudo systemctl daemon-reload
-
-sudo systemctl enable docker.mysql
-
-sudo systemctl start docker.mysql
 ```
 
 #### Optional: Backup data from MySQL
@@ -84,21 +62,12 @@ sudo systemctl start docker.mysql
 ./solr/solr-configure.sh
 ```
 
-* Verify the `ExecStart` line in `solr/docker.solr.service` is the same as the working command in `solr/docker-solr.sh`
-
-* Install and enable the service
-
+* Run the Solr container with
 ```bash
-sudo cp solr/docker.solr.service /etc/systemd/system
-
-sudo systemctl daemon-reload
-
-sudo systemctl enable docker.solr
-
-sudo systemctl start docker.solr
+./solr/docker-solr.sh
 ```
 
-#### Solr Configuration Details
+#### Solr Configuration Details, FYI
 
 * The `/opt/solr/server/solr/mycores/bills/conf/solrconfig.xml` has the code added to the **config** element
 
@@ -134,54 +103,24 @@ sudo systemctl start docker.solr
 <!-- ********** end custom fields ********** -->
 ```
 
-### Deploy Grails docker API
+### Deploy Springboot docker API
 
-* Inside the **grails-api** directory, build a container with
+* Inside the **springboot-api** directory, build a container with
 ```bash
 ./docker-build.sh
 ```
 
 * Verify the containers runs with
 ```bash
-./docker-grails.sh
+./docker-springboot.sh
 ```
 
-* Install and enable the service
+#### Local Springboot development
+* Use the following script to run locally against a mysql docker container
+
 ```bash
-sudo cp docker.grails.service /etc/systemd/system
-
-sudo systemctl daemon-reload
-
-sudo systemctl enable docker.grails
-
-sudo systemctl start docker.grails
+./local-run.sh
 ```
-
-* View logs from stdout with
-```bash
-sudo journalctl -u docker.grails.service -f
-```
-
-#### Upgrade Grails
-
-* Upgrading grails sometimes requires creating a new project
-```bash
-grails create-app grails-api --profile=rest-api
-```
-
-* Copy or Recreate domain classes if necessary. Example:
-```bash
-grails create-domain-class api.Bill
-```
-
-* Copy or Recreate controllers if necessary. Example:
-```bash
-grails create-controller api.Bill
-```
-
-* Copy **grails-app/init/grails/api/Bootstrap.groovy**
-
-* Update **application.yaml** and **build.gradle**
 
 ### Setup nginx docker service
 
@@ -206,18 +145,6 @@ client/docker-nginx.sh
 
 * The application will be running on [http://localhost](http://localhost)
 
-* Install and enable the service
-
-```bash
-sudo cp client/docker.nginx.service /etc/systemd/system
-
-sudo systemctl daemon-reload
-
-sudo systemctl enable docker.nginx
-
-sudo systemctl start docker.nginx
-```
-
 #### AngularJS client development
 
 * Inside the `client` directory run
@@ -226,3 +153,10 @@ npx grunt serve
 ```
 
 * A livereload development server will be available at [http://localhost:9000](http://localhost:9000)
+
+## Run all the containers
+* After configuring and verifying the containers run, use the following scripts to run and stop all the containers
+```bash
+./docker-run-all.sh
+./docker-stop-all.sh
+```
