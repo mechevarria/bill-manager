@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,7 +31,7 @@ public class BillController {
         if (results != null) {
             return ResponseEntity.ok().body(results);
         } else {
-            return ResponseEntity.status(500).body("Could not get bills");
+            return handleError("Could not get bills");
         }
     }
 
@@ -40,7 +41,7 @@ public class BillController {
         if (bills != null) {
             return ResponseEntity.ok().body(bills);
         } else {
-            return ResponseEntity.status(500).body("Could not get summary");
+            return handleError("Could not get summary");
         }
     }
 
@@ -50,7 +51,7 @@ public class BillController {
         if (bill != null) {
             return ResponseEntity.ok().body(bill);
         } else {
-            return ResponseEntity.status(500).body("Could not save bill");
+            return handleError("Could not save bill");
         }
     }
 
@@ -60,7 +61,7 @@ public class BillController {
         if (bill != null) {
             return ResponseEntity.ok().body(bill);
         } else {
-            return ResponseEntity.status(500).body("Could not update bill");
+            return handleError("Could not update bill");
         }
     }
 
@@ -70,7 +71,7 @@ public class BillController {
         if (bill != null) {
             return ResponseEntity.ok().body(bill);
         } else {
-            return ResponseEntity.status(500).body("Could get bill ID=" + id);
+            return handleError("Could get bill ID=" + id);
         }
     }
 
@@ -82,7 +83,13 @@ public class BillController {
             result.put("text", msg);
             return ResponseEntity.ok().body(result);
         } else {
-            return ResponseEntity.status(500).body("Could delete bill ID=" + id);
+            return handleError("Could delete bill ID=" + id);
         }
+    }
+
+    private ResponseEntity<Object> handleError(String msg) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", msg);
+        return ResponseEntity.status(500).body(error);
     }
 }

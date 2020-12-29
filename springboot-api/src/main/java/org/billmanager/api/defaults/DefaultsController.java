@@ -1,5 +1,8 @@
 package org.billmanager.api.defaults;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ public class DefaultsController {
         if (defaults != null) {
             return ResponseEntity.ok().body(defaults);
         } else {
-            return ResponseEntity.status(500).body("Could not get system defaults");
+            return handleError("Could not get system defaults");
         }
     }
 
@@ -34,7 +37,13 @@ public class DefaultsController {
         if (defaults != null) {
             return ResponseEntity.ok().body(defaults);
         } else {
-            return ResponseEntity.status(500).body("Could not update system defaults");
+            return handleError("Could not update system defaults");
         }
+    }
+
+    private ResponseEntity<Object> handleError(String msg) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", msg);
+        return ResponseEntity.status(500).body(error);
     }
 }
