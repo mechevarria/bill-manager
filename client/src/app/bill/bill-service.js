@@ -77,7 +77,7 @@ app.factory('BillSrvc', function ($http, $q) {
       error(function (data) {
         response = {
           type: 'error',
-          msg: data
+          msg: data.error
         };
 
         deferred.resolve(response);
@@ -103,7 +103,7 @@ app.factory('BillSrvc', function ($http, $q) {
       error(function (data) {
         response = {
           type: 'error',
-          msg: data
+          msg: data.error
         };
 
         deferred.resolve(response);
@@ -128,7 +128,7 @@ app.factory('BillSrvc', function ($http, $q) {
       error(function (msg) {
         response = {
           type: 'error',
-          msg: msg
+          msg: msg.error
         };
 
         deferred.resolve(response);
