@@ -3,6 +3,8 @@ package org.billmanager.api.defaults;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.billmanager.api.ApiException;
+import org.billmanager.api.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +18,15 @@ public class DefaultsService {
     private DefaultsRepository repository;
 
     public Defaults get() {
-        try {
-            Long defaultsId = repository.findId();
-            Defaults defaults = repository.findById(defaultsId).get();
-            return defaults;
-        } catch (Exception ex) {
-            logger.warn(ex.getMessage());
+        Long defaultsId = repository.findId();
+        if (defaultsId == null) {
+            logger.info("No defaults row found, seeding new one");
             return getNew();
         }
+        return repository.findById(defaultsId).orElseGet(this::getNew);
     }
 
     public Defaults getNew() {
-
         Owner owner1 = new Owner();
         owner1.setName("owner1");
         owner1.setLabel("owner1");
@@ -45,23 +44,21 @@ public class DefaultsService {
         defaults.setOwners(owners);
 
         try {
-            repository.save(defaults);
-            return defaults;
+            return repository.save(defaults);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
+            throw new ApiException("Could not seed system defaults", ex);
         }
     }
 
     public Defaults update(Defaults defaults) {
         try {
-            // make sure we do not insert a new record
-            repository.findById(defaults.getId()).get();
-            defaults = repository.save(defaults);
-            return defaults;
+            repository.findById(defaults.getId())
+                .orElseThrow(() -> new NotFoundException("Defaults ID=" + defaults.getId() + " not found"));
+            return repository.save(defaults);
+        } catch (ApiException ex) {
+            throw ex;
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
+            throw new ApiException("Could not update system defaults", ex);
         }
     }
 }

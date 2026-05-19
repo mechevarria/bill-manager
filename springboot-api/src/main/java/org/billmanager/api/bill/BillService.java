@@ -1,13 +1,19 @@
 package org.billmanager.api.bill;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.billmanager.api.ApiException;
+import org.billmanager.api.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,33 +27,27 @@ import org.springframework.stereotype.Service;
 public class BillService {
     private static final Logger logger = LoggerFactory.getLogger(BillService.class);
 
+    private static final DateTimeFormatter BILL_MONTH_FORMAT =
+        DateTimeFormatter.ofPattern("dd-MMMM-uuuu", Locale.ENGLISH);
+    private static final DateTimeFormatter DETAIL_DATE_FORMAT =
+        DateTimeFormatter.ofPattern("MM/dd/uuuu", Locale.ENGLISH);
+
     @Autowired
     private BillRepository repository;
 
     public Map<String, Object> getAll(int size, int start, String sortField, String order) {
         try {
-            Sort sort = Sort.by(sortField);
-            if (order.equalsIgnoreCase("desc")) {
-                logger.info("order=" + order + " is descending");
-                sort = sort.descending();
-            } else {
-                logger.info("order=" + order + " is ascending");
-                sort = sort.ascending();
-            }
+            Sort sort = "desc".equalsIgnoreCase(order) ? Sort.by(sortField).descending() : Sort.by(sortField).ascending();
+            logger.info("order={} sortField={}", order, sortField);
             Pageable pageable = PageRequest.of(start, size, sort);
             Page<Bill> page = repository.summary(pageable);
-            List<Bill> bills = page.getContent();
-            long count = page.getTotalElements();
 
             Map<String, Object> results = new HashMap<>();
-            results.put("bills", bills);
-            results.put("count", count);
-
+            results.put("bills", page.getContent());
+            results.put("count", page.getTotalElements());
             return results;
-
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
+            throw new ApiException("Could not get bills", ex);
         }
     }
 
@@ -55,20 +55,21 @@ public class BillService {
         try {
             String month = bill.getMonth();
             String year = bill.getYear();
-            Date billDate = new SimpleDateFormat("dd-MMMM-yyyy").parse("02" + "-" + month + "-" + year);
+            LocalDate parsed = LocalDate.parse("02-" + month + "-" + year, BILL_MONTH_FORMAT);
+            Date billDate = Date.from(parsed.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
             bill.setBillDate(billDate);
-            // update expenses
+
             Set<Expense> expenses = new HashSet<>();
             bill.getExpenses().forEach(expense -> {
-                // update details
                 Set<Detail> details = new HashSet<>();
                 expense.getDetails().forEach(detail -> {
-                    if(detail.getDate() != null) {
+                    if (detail.getDate() != null) {
                         try {
-                            detail.setDetailDate(new SimpleDateFormat("MM/dd/yyyy").parse(detail.getDate()));
-                        } catch (Exception ex) {
-                            logger.error(ex.getMessage(), ex);
+                            LocalDate d = LocalDate.parse(detail.getDate(), DETAIL_DATE_FORMAT);
+                            detail.setDetailDate(Date.from(d.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                        } catch (DateTimeParseException ex) {
+                            logger.warn("Invalid detail date '{}', clearing", detail.getDate());
                             detail.setDate(null);
                         }
                     } else {
@@ -83,8 +84,7 @@ public class BillService {
                 expenses.add(expense);
             });
             bill.setExpenses(expenses);
-            
-            // update incomes
+
             Set<Income> incomes = new HashSet<>();
             bill.getIncomes().forEach(income -> {
                 income.setMonth(month);
@@ -94,32 +94,28 @@ public class BillService {
             });
             bill.setIncomes(incomes);
 
-            bill = repository.save(bill);
-            return bill;
+            return repository.save(bill);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
+            throw new ApiException("Could not save bill", ex);
         }
     }
 
     public Bill get(Long id) {
-        try {
-            return repository.findById(id).get();
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
-        }
+        return repository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Could not get bill ID=" + id));
     }
 
     public String delete(Long id) {
         try {
-            Bill bill = repository.findById(id).get();
+            Bill bill = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Could not delete bill ID=" + id));
             String msg = bill.getMonth() + " - " + bill.getYear() + " successfully deleted";
             repository.deleteById(id);
             return msg;
+        } catch (ApiException ex) {
+            throw ex;
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
+            throw new ApiException("Could not delete bill ID=" + id, ex);
         }
     }
 
@@ -127,8 +123,7 @@ public class BillService {
         try {
             return repository.summary();
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
+            throw new ApiException("Could not get summary", ex);
         }
     }
 }
