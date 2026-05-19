@@ -105,6 +105,16 @@ public class BillService {
             .orElseThrow(() -> new NotFoundException("Could not get bill ID=" + id));
     }
 
+    public long deleteAll() {
+        try {
+            long count = repository.count();
+            repository.deleteAllInBatch();
+            return count;
+        } catch (Exception ex) {
+            throw new ApiException("Could not delete all bills", ex);
+        }
+    }
+
     public String delete(Long id) {
         try {
             Bill bill = repository.findById(id)

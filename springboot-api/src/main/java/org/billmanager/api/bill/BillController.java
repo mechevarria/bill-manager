@@ -34,7 +34,23 @@ public class BillController {
 
     @PostMapping("/bill")
     public Bill save(@RequestBody Bill bill) {
+        // POST creates a new bill: strip IDs from the bill and all children so
+        // imported / template payloads can't accidentally merge into existing rows.
+        bill.setId(0L);
+        bill.getExpenses().forEach(e -> {
+            e.setId(0L);
+            if (e.getDetails() != null) {
+                e.getDetails().forEach(d -> d.setId(0L));
+            }
+        });
+        bill.getIncomes().forEach(i -> i.setId(0L));
         return billService.save(bill);
+    }
+
+    @DeleteMapping("/bill")
+    public Map<String, Object> deleteAll() {
+        long count = billService.deleteAll();
+        return Map.of("text", count + " bill(s) deleted", "count", count);
     }
 
     @PutMapping("/bill/{id}")
