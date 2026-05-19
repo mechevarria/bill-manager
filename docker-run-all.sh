@@ -5,9 +5,6 @@ cd /volume1/docker/bill-manager
 cd mysql
 ./docker-mysql.sh
 
-cd ../solr
-./docker-solr.sh
-
 sleep 3
 
 cd ../springboot-api
