@@ -1,11 +1,13 @@
-FROM openjdk:11.0.9.1
-
+FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
-
-COPY . .
-
+COPY .mvn .mvn
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:go-offline -B
+COPY src ./src
 RUN ./mvnw -DskipTests package
 
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/springboot-api-*.jar app.jar
 EXPOSE 8080
-
-CMD ["java", "-Xms128m", "-jar", "./target/springboot-api-0.1.2-SNAPSHOT.jar"]
+CMD ["java", "-Xms128m", "-jar", "app.jar"]
