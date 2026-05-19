@@ -1,5 +1,3 @@
 #!/usr/bin/env bash
 
-export HOST=localhost
-
-mvn spring-boot:run
+./mvnw spring-boot:run
