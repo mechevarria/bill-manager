@@ -1,11 +1,14 @@
 bill-manager
 =============
 
-Angular client and Springboot api application to manage monthly expenses/income with a MySQL backend and search provided by Solr
+Angular client and Spring Boot API for managing monthly expenses/income with a MySQL backend. Full-text search across incomes, expenses, and credit-card details is served by the Spring Boot API using MySQL `FULLTEXT` indexes (no separate search service).
 
-## Installation Steps
+## Prerequisites
 
-* Install [docker-ce](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+* [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) — used to run MySQL, the Spring Boot API, and the nginx-served client
+* Java 17 JDK — required to build the Spring Boot 4.x API
+* Node.js (current LTS) — required to build the AngularJS client
+* MySQL 8 — provided via the Docker container; required for the `FULLTEXT` indexes that the API auto-creates on startup
 
 * Make sure the user that will run docker is in the docker group. In this example, the username is `vmuser`
 
@@ -13,10 +16,10 @@ Angular client and Springboot api application to manage monthly expenses/income 
 sudo usermod vmuser -a -G docker
 ```
 
-### Install node.js
+### Install Node.js
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 
 sudo apt-get install -y nodejs
 ```
@@ -29,7 +32,7 @@ sudo apt-get install -y nodejs
 mysql/docker-mysql.sh
 ```
 
-* After making sure the container runs you can stop the container with 
+* After making sure the container runs you can stop the container with
 ```bash
 docker stop mysql
 ```
@@ -54,55 +57,6 @@ docker stop mysql
 ./mysql/db-restore.sh
 ```
 
-
-### Install Solr docker Service
-
-* Configure the container core directory with 
-```bash
-./solr/solr-configure.sh
-```
-
-* Run the Solr container with
-```bash
-./solr/docker-solr.sh
-```
-
-#### Solr Configuration Details, FYI
-
-* The `/opt/solr/server/solr/mycores/bills/conf/solrconfig.xml` has the code added to the **config** element
-
-```xml
-<requestHandler name="/dataimport" class="org.apache.solr.handler.dataimport.DataImportHandler">
-  <lst name="defaults">
-    <str name="config">data-config.xml</str>
-  </lst>
-</requestHandler>
-```
-
-* The `/opt/solr/server/solr/mycores/bills/conf/managed-schema` has after this line
-
-```xml
-<field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true" />
-```
-
-* The following block added
-
-```xml
-<!-- ********** custom fields for bill-manager ********** -->
-<field name="db_id" type="string" indexed="true" stored="true" />
-<field name="item_date" type="pdate" indexed="true" stored="true" />
-<field name="author" type="string" indexed="true" stored="true" />
-<field name="description" type="text_general" indexed="true" stored="true" />
-<field name="price" type="pfloat" indexed="true" stored="true" />
-<field name="last_modified" type="pdate" indexed="true" stored="true" />
-<field name="category" type="string" indexed="true" stored="true" />
- 
-<copyField source="author" dest="_text_" />
-<copyField source="description" dest="_text_" />
-<copyField source="category" dest="_text_" />
-<!-- ********** end custom fields ********** -->
-```
-
 ### Deploy Springboot docker API
 
 * Inside the **springboot-api** directory, build a container with
@@ -110,10 +64,12 @@ docker stop mysql
 ./docker-build.sh
 ```
 
-* Verify the containers runs with
+* Verify the container runs with
 ```bash
 ./docker-springboot.sh
 ```
+
+On first startup against a populated database, the API creates three `FULLTEXT` indexes — on `income.description`, `expense.name`, and `detail.description`. Creation is idempotent; subsequent startups are no-ops.
 
 #### Local Springboot development
 * Use the following script to run locally against a mysql docker container
@@ -121,6 +77,14 @@ docker stop mysql
 ```bash
 ./local-run.sh
 ```
+
+#### Search behavior note
+
+The `/search` endpoint uses MySQL boolean-mode `MATCH ... AGAINST`. MySQL's default `innodb_ft_min_token_size` is 3, so single- and two-character search terms are ignored. If you need to search short vendor abbreviations (e.g. "TJ", "BJ"), lower that variable in MySQL config and rebuild the indexes.
+
+#### CSV import note
+
+Credit-card CSV parsing happens in the API at `POST /detail/parse` using Apache Commons CSV (handles RFC 4180 quoted fields with embedded newlines). The client uploads the file as multipart; no parsing logic runs in the browser. Sample Amex CSVs for manual testing live in `springboot-api/test-data/`.
 
 ### Setup nginx docker service
 
