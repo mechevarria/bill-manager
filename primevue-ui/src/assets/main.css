@@ -1,0 +1,82 @@
+@import './base.css';
+
+html,
+body,
+#app {
+  min-height: 100vh;
+}
+
+body {
+  background: var(--p-surface-50, #f8fafc);
+  color: var(--p-text-color, #1f2937);
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+html.app-dark body {
+  background: var(--p-surface-950, #09090b);
+  color: var(--p-text-color, #f3f4f6);
+}
+
+/* Sakai-style content card: white surface, rounded, padded, subtle shadow */
+.card {
+  background: var(--p-content-background, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 0.03),
+    0 1px 6px -1px rgb(0 0 0 / 0.02);
+}
+
+/* Minimal utility classes mirroring the Tailwind names Sakai's docs use,
+ * so component markup can be copy-pasteable from sakai.primevue.org. */
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.text-base { font-size: 1rem; line-height: 1.5rem; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-muted-color { color: var(--p-text-muted-color, #6b7280); }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+
+/* Amount color coding. Income / refunds = positive (green), expense = negative (red). */
+.amount-positive { color: var(--p-green-600, #16a34a); font-variant-numeric: tabular-nums; }
+.amount-negative { color: var(--p-red-600, #dc2626); font-variant-numeric: tabular-nums; }
+.amount-neutral  { color: var(--p-text-muted-color, #6b7280); font-variant-numeric: tabular-nums; }
+
+/* Empty-state block used in DataTable #empty slots */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  color: var(--p-text-muted-color, #6b7280);
+  gap: 0.5rem;
+}
+.empty-state .pi {
+  font-size: 2rem;
+  color: var(--p-text-muted-color, #9ca3af);
+}
+.empty-state-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--p-text-color);
+}
