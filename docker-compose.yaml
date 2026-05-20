@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: mysql/mysql-server:latest
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: billDb
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+      TZ: America/New_York
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  springboot:
+    image: quay.io/mechevarria/springboot-billmanager:latest
+    container_name: springboot
+    environment:
+      HOST: mysql
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  primevue:
+    build: ./primevue-ui
+    container_name: primevue
+    ports:
+      - "8000:80"
+    depends_on:
+      - springboot
