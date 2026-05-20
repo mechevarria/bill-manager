@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
+import Toolbar from 'primevue/toolbar'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
@@ -42,10 +43,7 @@ const ownerOptions = ref<{ label: string; value: string }[]>([])
 watch(
   () => props.owners,
   (next) => {
-    ownerOptions.value = [
-      { label: '', value: '' },
-      ...next.map((o) => ({ label: o.label, value: o.name })),
-    ]
+    ownerOptions.value = next.map((o) => ({ label: o.label, value: o.name }))
   },
   { immediate: true },
 )
@@ -64,7 +62,7 @@ function addDetail() {
     type: '',
     description: '',
     amount: 0,
-    personal: '',
+    personal: null,
     lastUpdated: '',
   } as unknown as Detail)
 }
@@ -84,6 +82,22 @@ function clearAll() {
       notify.info('Details cleared')
     },
   })
+}
+
+const colorSwatches: Record<string, string> = {
+  active: '#64748b',
+  success: '#22c55e',
+  info: '#0ea5e9',
+  warning: '#f97316',
+  danger: '#ef4444',
+}
+
+function detailRowStyle(detail: Detail): Record<string, string> {
+  if (!detail.personal) return {}
+  const owner = props.owners.find((o) => o.name === detail.personal)
+  if (!owner?.color) return {}
+  const hex = colorSwatches[owner.color] ?? '#6b7280'
+  return { backgroundColor: hex + '1a' }
 }
 
 async function onCsvSelect(event: FileUploadSelectEvent) {
@@ -116,26 +130,30 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
     :visible="visible"
     :header="`Details — ${expenseName || 'expense'}`"
     modal
+    :draggable="false"
     :style="{ width: '70rem' }"
     @update:visible="emit('update:visible', $event)"
   >
-    <div class="flex items-center gap-2 mb-4">
-      <Button label="Add" icon="pi pi-plus" severity="secondary" size="small" @click="addDetail" />
-      <Button label="Clear All" icon="pi pi-trash" severity="danger" text size="small" @click="clearAll" />
-      <FileUpload
-        mode="basic"
-        accept=".csv,text/csv"
-        :auto="true"
-        choose-label="Import CSV"
-        choose-icon="pi pi-upload"
-        custom-upload
-        :choose-button-props="{ size: 'small', severity: 'secondary' }"
-        @select="onCsvSelect"
-      />
-      <span class="text-muted-color text-sm" style="margin-left: auto">
-        {{ working.length }} row(s)
-      </span>
-    </div>
+    <Toolbar class="mb-4">
+      <template #start>
+        <div class="flex items-center gap-2">
+          <FileUpload
+            mode="basic"
+            accept=".csv,text/csv"
+            :auto="true"
+            choose-label="Import CSV"
+            choose-icon="pi pi-upload"
+            custom-upload
+            :choose-button-props="{ size: 'small', outlined: true }"
+            @select="onCsvSelect"
+          />
+          <Button label="Add" icon="pi pi-plus" outlined size="small" @click="addDetail" />
+        </div>
+      </template>
+      <template #end>
+        <Button label="Clear All" icon="pi pi-trash" severity="danger" outlined size="small" @click="clearAll" />
+      </template>
+    </Toolbar>
 
     <DataTable
       :value="working"
@@ -143,11 +161,15 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
       scrollable
       scroll-height="400px"
       paginator
-      :rows="25"
+      :rows="100"
       :rows-per-page-options="[25, 50, 100]"
       striped-rows
       size="small"
+      :row-style="detailRowStyle"
     >
+      <template #footer>
+        <span class="text-muted-color text-sm">{{ working.length }} total</span>
+      </template>
       <template #empty>
         <div class="empty-state">
           <i class="pi pi-file" />
@@ -155,33 +177,35 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
           <div>Add rows manually or use <b>Import CSV</b> to upload a credit-card statement.</div>
         </div>
       </template>
-      <Column field="date" header="Date" style="width: 8rem">
+      <Column field="date" header="Date" style="width: 8rem" sortable>
         <template #body="{ data }">
           <InputText v-model="data.date" placeholder="MM/DD/YYYY" size="small" fluid />
         </template>
       </Column>
-      <Column field="type" header="Type">
+      <Column field="type" header="Type" sortable>
         <template #body="{ data }">
           <InputText v-model="data.type" size="small" fluid />
         </template>
       </Column>
-      <Column field="description" header="Description">
+      <Column field="description" header="Description" sortable>
         <template #body="{ data }">
           <InputText v-model="data.description" size="small" fluid />
         </template>
       </Column>
-      <Column field="amount" header="Amount" style="width: 10rem">
+      <Column field="amount" header="Amount" style="width: 10rem" sortable>
         <template #body="{ data }">
           <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" size="small" fluid />
         </template>
       </Column>
-      <Column field="personal" header="Personal" style="width: 9rem">
+      <Column field="personal" header="Personal" style="width: 9rem" sortable>
         <template #body="{ data }">
           <Select
             v-model="data.personal"
             :options="ownerOptions"
             option-label="label"
             option-value="value"
+            placeholder="—"
+            show-clear
             size="small"
             fluid
           />

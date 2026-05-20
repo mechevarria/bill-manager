@@ -37,6 +37,24 @@ const ownerOptions = computed(() =>
   owners.value.map((o) => ({ label: o.label, value: o.name })),
 )
 
+const colorSwatches: Record<string, string> = {
+  active: '#64748b',
+  success: '#22c55e',
+  info: '#0ea5e9',
+  warning: '#f97316',
+  danger: '#ef4444',
+}
+
+function rowStyleForOwner(ownerName: string): Record<string, string> {
+  const owner = owners.value.find((o) => o.name === ownerName)
+  if (!owner?.color) return {}
+  const hex = colorSwatches[owner.color] ?? '#6b7280'
+  return { backgroundColor: hex + '1a' }
+}
+
+function incomeRowStyle(income: Income) { return rowStyleForOwner(income.owner) }
+function expenseRowStyle(expense: Expense) { return rowStyleForOwner(expense.paid) }
+
 const round = (n: number) => Math.round(n * 100) / 100
 
 function sumIncomeFor(name: string, incomes: Income[]): number {
@@ -240,6 +258,7 @@ function openDetails(expense: Expense) {
 function applyDetails(next: Detail[]) {
   if (editingExpense.value) {
     editingExpense.value.details = next
+    editingExpense.value.amount = round(next.reduce((sum, d) => sum + (d.amount ?? 0), 0))
   }
 }
 
@@ -315,7 +334,7 @@ function fmt(value: number | null | undefined): string {
     <!-- Income -->
     <div class="card">
       <div class="font-semibold text-base mb-4">Income</div>
-      <DataTable :value="bill.incomes" data-key="id" size="small">
+      <DataTable :value="bill.incomes" data-key="id" size="small" :row-style="incomeRowStyle">
         <template #footer>
           <span class="text-muted-color text-sm">{{ bill.incomes.length }} total</span>
         </template>
@@ -352,7 +371,7 @@ function fmt(value: number | null | undefined): string {
     <!-- Expense -->
     <div class="card">
       <div class="font-semibold text-base mb-4">Expense</div>
-      <DataTable :value="bill.expenses" data-key="id" size="small">
+      <DataTable :value="bill.expenses" data-key="id" size="small" :row-style="expenseRowStyle">
         <template #footer>
           <span class="text-muted-color text-sm">{{ bill.expenses.length }} total</span>
         </template>
