@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
 import Button from 'primevue/button'
+import Toolbar from 'primevue/toolbar'
+import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
@@ -85,7 +82,10 @@ interface Summary {
   settlement: string
 }
 
-const summary = computed<Summary | null>(() => {
+const summaryResult = ref<Summary | null>(null)
+const summaryDialogOpen = ref(false)
+
+function computeSummary(): Summary | null {
   if (!bill.value || !owner1.value || !owner2.value) return null
   const b = bill.value
   const o1 = owner1.value
@@ -142,24 +142,7 @@ const summary = computed<Summary | null>(() => {
     percentText,
     settlement,
   }
-})
-
-// Push computed totals into the bill object before save (the API persists them).
-watch(
-  summary,
-  (s) => {
-    if (!bill.value || !s) return
-    bill.value.owner1Income = s.owner1Income
-    bill.value.owner2Income = s.owner2Income
-    bill.value.totalIncome = s.totalIncome
-    bill.value.owner1Personal = s.owner1Personal
-    bill.value.owner2Personal = s.owner2Personal
-    bill.value.totalExpense = s.totalExpense
-    bill.value.owner1Owe = s.owner1Owe
-    bill.value.owner2Owe = s.owner2Owe
-  },
-  { deep: true },
-)
+}
 
 async function load() {
   const id = Number(route.params.id)
@@ -274,6 +257,21 @@ async function save() {
   }
 }
 
+function calculate() {
+  const s = computeSummary()
+  if (!s || !bill.value) return
+  bill.value.owner1Income = s.owner1Income
+  bill.value.owner2Income = s.owner2Income
+  bill.value.totalIncome = s.totalIncome
+  bill.value.owner1Personal = s.owner1Personal
+  bill.value.owner2Personal = s.owner2Personal
+  bill.value.totalExpense = s.totalExpense
+  bill.value.owner1Owe = s.owner1Owe
+  bill.value.owner2Owe = s.owner2Owe
+  summaryResult.value = s
+  summaryDialogOpen.value = true
+}
+
 function cancel() {
   router.push({ name: 'bills' })
 }
@@ -285,226 +283,196 @@ function fmt(value: number | null | undefined): string {
 </script>
 
 <template>
+  <!-- Header -->
   <div class="card">
-    <div class="flex items-center gap-4 mb-4">
-      <div class="font-semibold text-xl">
-        Bill {{ bill ? `— ${bill.month} ${bill.year}` : `#${route.params.id}` }}
-      </div>
-      <div style="margin-left: auto" class="flex items-center gap-2">
-        <Button label="Back" icon="pi pi-arrow-left" severity="secondary" text size="small" @click="cancel" />
-        <Button label="Save" icon="pi pi-check" :loading="saving" :disabled="!bill" size="small" @click="save" />
-      </div>
+    <div class="font-semibold text-xl mb-4">
+      Editing {{ bill ? `${bill.month} ${bill.year}` : `#${route.params.id}` }}
+    </div>
+    <Toolbar>
+      <template #start>
+        <div class="flex items-center gap-2">
+          <Button label="Add Income" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addIncome" />
+          <Button label="Add Expense" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addExpense" />
+          <Button label="Calculate" icon="pi pi-calculator" outlined size="small" :disabled="!bill" @click="calculate" />
+        </div>
+      </template>
+      <template #end>
+        <div class="flex items-center gap-2">
+          <Button label="Back" icon="pi pi-arrow-left" severity="secondary" text size="small" @click="cancel" />
+          <Button label="Save" icon="pi pi-check" :loading="saving" :disabled="!bill" size="small" @click="save" />
+        </div>
+      </template>
+    </Toolbar>
+
+    <ProgressSpinner v-if="loading" style="width: 2rem; height: 2rem; margin-top: 1rem" />
+    <Message v-else-if="error" severity="error" :closable="false" class="mt-4">{{ error }}</Message>
+    <Message v-else-if="bill && (!owner1 || !owner2)" severity="warn" :closable="false" class="mt-4">
+      System defaults need at least two owners. Visit the Defaults page to configure them.
+    </Message>
+  </div>
+
+  <template v-if="bill">
+    <!-- Income -->
+    <div class="card">
+      <div class="font-semibold text-base mb-4">Income</div>
+      <DataTable :value="bill.incomes" data-key="id" size="small">
+        <template #footer>
+          <span class="text-muted-color text-sm">{{ bill.incomes.length }} total</span>
+        </template>
+        <template #empty>
+          <div class="empty-state">
+            <i class="pi pi-wallet" />
+            <div class="empty-state-title">No income rows</div>
+            <div>Use <b>Add Income</b> in the toolbar to record one.</div>
+          </div>
+        </template>
+        <Column header="Owner" style="width: 12rem">
+          <template #body="{ data }">
+            <Select v-model="data.owner" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
+          </template>
+        </Column>
+        <Column header="Description">
+          <template #body="{ data }">
+            <InputText v-model="data.description" size="small" fluid />
+          </template>
+        </Column>
+        <Column header="Amount" style="width: 12rem">
+          <template #body="{ data }">
+            <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" size="small" fluid />
+          </template>
+        </Column>
+        <Column header="" style="width: 4rem">
+          <template #body="{ data }">
+            <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete income" @click="confirmDeleteIncome(data)" />
+          </template>
+        </Column>
+      </DataTable>
     </div>
 
-    <ProgressSpinner v-if="loading" style="width: 2rem; height: 2rem" />
-    <Message v-else-if="error" severity="error" :closable="false">{{ error }}</Message>
-    <Message
-      v-else-if="bill && (!owner1 || !owner2)"
-      severity="warn"
-      :closable="false"
-    >
-      System defaults need at least two owners. Visit the System page to configure them.
-    </Message>
-
-    <Tabs v-if="bill && summary" value="summary">
-      <TabList>
-        <Tab value="summary">Summary</Tab>
-        <Tab value="income">Income ({{ bill.incomes.length }})</Tab>
-        <Tab value="expense">Expense ({{ bill.expenses.length }})</Tab>
-      </TabList>
-      <TabPanels>
-        <!-- Summary -->
-        <TabPanel value="summary">
-          <div class="font-semibold text-lg mb-2">{{ summary.settlement }}</div>
-          <p class="text-muted-color text-sm mb-4">{{ summary.percentText }}</p>
-
-          <table class="summary-grid">
-            <thead>
-              <tr>
-                <th></th>
-                <th>{{ owner1?.label }}</th>
-                <th>{{ owner2?.label }}</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>Income</th>
-                <td>{{ fmt(summary.owner1Income) }}</td>
-                <td>{{ fmt(summary.owner2Income) }}</td>
-                <td>{{ fmt(summary.totalIncome) }}</td>
-              </tr>
-              <tr>
-                <th>Personal expenses</th>
-                <td>{{ fmt(summary.owner1Personal) }}</td>
-                <td>{{ fmt(summary.owner2Personal) }}</td>
-                <td>{{ fmt(summary.totalPersonal) }}</td>
-              </tr>
-              <tr>
-                <th>Shared portion</th>
-                <td>{{ fmt(summary.owner1Shared) }}</td>
-                <td>{{ fmt(summary.owner2Shared) }}</td>
-                <td>{{ fmt(summary.totalShared) }}</td>
-              </tr>
-              <tr>
-                <th>Paid (out of pocket)</th>
-                <td>{{ fmt(summary.owner1Paid) }}</td>
-                <td>{{ fmt(summary.owner2Paid) }}</td>
-                <td>{{ fmt(summary.owner1Paid + summary.owner2Paid) }}</td>
-              </tr>
-              <tr>
-                <th>Net owed</th>
-                <td :class="{ 'amount-positive': summary.owner1Owe < 0, 'amount-negative': summary.owner1Owe > 0 }">
-                  {{ fmt(summary.owner1Owe) }}
-                </td>
-                <td :class="{ 'amount-positive': summary.owner2Owe < 0, 'amount-negative': summary.owner2Owe > 0 }">
-                  {{ fmt(summary.owner2Owe) }}
-                </td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
-        </TabPanel>
-
-        <!-- Income -->
-        <TabPanel value="income">
-          <div class="mb-4">
-            <Button label="Add Income" icon="pi pi-plus" severity="secondary" size="small" @click="addIncome" />
+    <!-- Expense -->
+    <div class="card">
+      <div class="font-semibold text-base mb-4">Expense</div>
+      <DataTable :value="bill.expenses" data-key="id" size="small">
+        <template #footer>
+          <span class="text-muted-color text-sm">{{ bill.expenses.length }} total</span>
+        </template>
+        <template #empty>
+          <div class="empty-state">
+            <i class="pi pi-receipt" />
+            <div class="empty-state-title">No expense rows</div>
+            <div>Use <b>Add Expense</b> in the toolbar to record one. Toggle <b>Has details</b> to attach line items.</div>
           </div>
-          <DataTable :value="bill.incomes" data-key="id" size="small">
-            <template #empty>
-              <div class="empty-state">
-                <i class="pi pi-wallet" />
-                <div class="empty-state-title">No income rows</div>
-                <div>Click <b>Add Income</b> to record one.</div>
-              </div>
-            </template>
-            <Column header="Owner" style="width: 12rem">
-              <template #body="{ data }">
-                <Select
-                  v-model="data.owner"
-                  :options="ownerOptions"
-                  option-label="label"
-                  option-value="value"
-                  size="small"
-                  fluid
-                />
-              </template>
-            </Column>
-            <Column header="Description">
-              <template #body="{ data }">
-                <InputText v-model="data.description" size="small" fluid />
-              </template>
-            </Column>
-            <Column header="Amount" style="width: 12rem">
-              <template #body="{ data }">
-                <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" size="small" fluid />
-              </template>
-            </Column>
-            <Column header="" style="width: 4rem">
-              <template #body="{ data }">
-                <Button
-                  icon="pi pi-trash"
-                  size="small"
-                  severity="danger"
-                  outlined
-                  rounded
-                  aria-label="Delete income"
-                  @click="confirmDeleteIncome(data)"
-                />
-              </template>
-            </Column>
-          </DataTable>
-        </TabPanel>
+        </template>
+        <Column header="Name">
+          <template #body="{ data }">
+            <InputText v-model="data.name" size="small" fluid />
+          </template>
+        </Column>
+        <Column header="Paid by" style="width: 12rem">
+          <template #body="{ data }">
+            <Select v-model="data.paid" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
+          </template>
+        </Column>
+        <Column header="Amount" style="width: 12rem">
+          <template #body="{ data }">
+            <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" :disabled="data.hasDetails" size="small" fluid />
+          </template>
+        </Column>
+        <Column header="Details" style="width: 14rem">
+          <template #body="{ data }">
+            <div class="flex items-center gap-2">
+              <ToggleSwitch :model-value="data.hasDetails" @update:model-value="toggleHasDetails(data, $event)" />
+              <Button
+                v-if="data.hasDetails"
+                icon="pi pi-list"
+                severity="secondary"
+                size="small"
+                :label="`${(data.details || []).length}`"
+                @click="openDetails(data)"
+              />
+            </div>
+          </template>
+        </Column>
+        <Column header="" style="width: 4rem">
+          <template #body="{ data }">
+            <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete expense" @click="confirmDeleteExpense(data)" />
+          </template>
+        </Column>
+      </DataTable>
+    </div>
+  </template>
 
-        <!-- Expense -->
-        <TabPanel value="expense">
-          <div class="mb-4">
-            <Button label="Add Expense" icon="pi pi-plus" severity="secondary" size="small" @click="addExpense" />
-          </div>
-          <DataTable :value="bill.expenses" data-key="id" size="small">
-            <template #empty>
-              <div class="empty-state">
-                <i class="pi pi-receipt" />
-                <div class="empty-state-title">No expense rows</div>
-                <div>Click <b>Add Expense</b> to record one. Toggle <b>Has details</b> to attach line items.</div>
-              </div>
-            </template>
-            <Column header="Name">
-              <template #body="{ data }">
-                <InputText v-model="data.name" size="small" fluid />
-              </template>
-            </Column>
-            <Column header="Paid by" style="width: 12rem">
-              <template #body="{ data }">
-                <Select
-                  v-model="data.paid"
-                  :options="ownerOptions"
-                  option-label="label"
-                  option-value="value"
-                  size="small"
-                  fluid
-                />
-              </template>
-            </Column>
-            <Column header="Amount" style="width: 12rem">
-              <template #body="{ data }">
-                <InputNumber
-                  v-model="data.amount"
-                  mode="currency"
-                  currency="USD"
-                  :min-fraction-digits="2"
-                  :disabled="data.hasDetails"
-                  size="small"
-                  fluid
-                />
-              </template>
-            </Column>
-            <Column header="Details" style="width: 14rem">
-              <template #body="{ data }">
-                <div class="flex items-center gap-2">
-                  <ToggleSwitch
-                    :model-value="data.hasDetails"
-                    @update:model-value="toggleHasDetails(data, $event)"
-                  />
-                  <Button
-                    v-if="data.hasDetails"
-                    icon="pi pi-list"
-                    severity="secondary"
-                    size="small"
-                    :label="`${(data.details || []).length}`"
-                    @click="openDetails(data)"
-                  />
-                </div>
-              </template>
-            </Column>
-            <Column header="" style="width: 4rem">
-              <template #body="{ data }">
-                <Button
-                  icon="pi pi-trash"
-                  size="small"
-                  severity="danger"
-                  outlined
-                  rounded
-                  aria-label="Delete expense"
-                  @click="confirmDeleteExpense(data)"
-                />
-              </template>
-            </Column>
-          </DataTable>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+  <Dialog
+    v-model:visible="summaryDialogOpen"
+    header="Summary"
+    modal
+    :draggable="false"
+    style="width: 44rem"
+  >
+    <template v-if="summaryResult">
+      <div class="font-semibold text-lg mb-2">{{ summaryResult.settlement }}</div>
+      <p class="text-muted-color text-sm mb-4">{{ summaryResult.percentText }}</p>
+      <table class="summary-grid">
+        <thead>
+          <tr>
+            <th></th>
+            <th>{{ owner1?.label }}</th>
+            <th>{{ owner2?.label }}</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Income</th>
+            <td>{{ fmt(summaryResult.owner1Income) }}</td>
+            <td>{{ fmt(summaryResult.owner2Income) }}</td>
+            <td>{{ fmt(summaryResult.totalIncome) }}</td>
+          </tr>
+          <tr>
+            <th>Personal expenses</th>
+            <td>{{ fmt(summaryResult.owner1Personal) }}</td>
+            <td>{{ fmt(summaryResult.owner2Personal) }}</td>
+            <td>{{ fmt(summaryResult.totalPersonal) }}</td>
+          </tr>
+          <tr>
+            <th>Shared portion</th>
+            <td>{{ fmt(summaryResult.owner1Shared) }}</td>
+            <td>{{ fmt(summaryResult.owner2Shared) }}</td>
+            <td>{{ fmt(summaryResult.totalShared) }}</td>
+          </tr>
+          <tr>
+            <th>Paid (out of pocket)</th>
+            <td>{{ fmt(summaryResult.owner1Paid) }}</td>
+            <td>{{ fmt(summaryResult.owner2Paid) }}</td>
+            <td>{{ fmt(summaryResult.owner1Paid + summaryResult.owner2Paid) }}</td>
+          </tr>
+          <tr>
+            <th>Net owed</th>
+            <td :class="{ 'amount-positive': summaryResult.owner1Owe < 0, 'amount-negative': summaryResult.owner1Owe > 0 }">
+              {{ fmt(summaryResult.owner1Owe) }}
+            </td>
+            <td :class="{ 'amount-positive': summaryResult.owner2Owe < 0, 'amount-negative': summaryResult.owner2Owe > 0 }">
+              {{ fmt(summaryResult.owner2Owe) }}
+            </td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
+    <template #footer>
+      <Button label="Close" severity="secondary" size="small" @click="summaryDialogOpen = false" />
+      <Button label="Save" icon="pi pi-check" size="small" :loading="saving" @click="save" />
+    </template>
+  </Dialog>
 
-    <DetailsDialog
-      v-if="editingExpense"
-      v-model:visible="detailsDialogOpen"
-      :details="editingExpense.details || []"
-      :owners="owners"
-      :expense-name="editingExpense.name"
-      @update:details="applyDetails"
-    />
-  </div>
+  <DetailsDialog
+    v-if="editingExpense"
+    v-model:visible="detailsDialogOpen"
+    :details="editingExpense.details || []"
+    :owners="owners"
+    :expense-name="editingExpense.name"
+    @update:details="applyDetails"
+  />
 </template>
 
 <style scoped>
