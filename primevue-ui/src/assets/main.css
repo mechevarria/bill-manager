@@ -56,9 +56,17 @@ html.app-dark body {
 .mt-2 { margin-top: 0.5rem; }
 .mt-4 { margin-top: 1rem; }
 .flex { display: flex; }
+.flex-col { flex-direction: column; }
 .items-center { align-items: center; }
 .gap-2 { gap: 0.5rem; }
 .gap-4 { gap: 1rem; }
+.pt-2 { padding-top: 0.5rem; }
+
+/* PrimeVue select/dropdown labels inherit the body line-height (1.5), which inflates their
+   height beyond that of native <input> elements at the same padding. Reset to match. */
+.p-select-label {
+  line-height: normal;
+}
 
 /* Amount color coding. Income / refunds = positive (green), expense = negative (red). */
 .amount-positive { color: var(--p-green-600, #16a34a); font-variant-numeric: tabular-nums; }
