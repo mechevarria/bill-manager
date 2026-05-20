@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Chart from 'primevue/chart'
 import Select from 'primevue/select'
+import Toolbar from 'primevue/toolbar'
 import Message from 'primevue/message'
 import Skeleton from 'primevue/skeleton'
 import { getSummary } from '@/services/billService'
@@ -19,19 +20,24 @@ interface YearOption {
   value: string
 }
 
-const selectedYear = ref<string>('')
+const selectedYear = ref<string>('last4')
 const yearOptions = computed<YearOption[]>(() => {
   const years = Array.from(new Set(bills.value.map((b) => b.year))).sort(
     (a, b) => Number(b) - Number(a),
   )
-  return [{ label: 'All', value: '' }, ...years.map((y) => ({ label: y, value: y }))]
+  return [
+    { label: 'Last 4 years', value: 'last4' },
+    ...years.map((y) => ({ label: y, value: y })),
+  ]
 })
 
-const filteredBills = computed(() =>
-  selectedYear.value
-    ? bills.value.filter((b) => b.year === selectedYear.value)
-    : bills.value,
-)
+const filteredBills = computed(() => {
+  if (selectedYear.value === 'last4') {
+    const cutoff = new Date().getFullYear() - 3
+    return bills.value.filter((b) => parseInt(b.year) >= cutoff)
+  }
+  return bills.value.filter((b) => b.year === selectedYear.value)
+})
 
 // --- Chart data + options are rebuilt whenever bills or theme change ---
 type ChartData = { labels: string[]; datasets: unknown[] }
@@ -170,17 +176,19 @@ watch(
 
 <template>
   <div class="card">
-    <div class="flex items-center gap-4 mb-4">
-      <div class="font-semibold text-xl">Charts</div>
-      <Select
-        v-model="selectedYear"
-        :options="yearOptions"
-        option-label="label"
-        option-value="value"
-        size="small"
-        style="min-width: 8rem"
-      />
-    </div>
+    <div class="font-semibold text-xl mb-4">Charts</div>
+    <Toolbar class="mb-4">
+      <template #start>
+        <Select
+          v-model="selectedYear"
+          :options="yearOptions"
+          option-label="label"
+          option-value="value"
+          size="small"
+          style="min-width: 8rem"
+        />
+      </template>
+    </Toolbar>
 
     <Skeleton v-if="loading" height="22rem" />
     <Message v-else-if="error" severity="error" :closable="false">{{ error }}</Message>
@@ -192,17 +200,33 @@ watch(
     </div>
   </div>
 
-  <div v-if="!loading && !error && filteredBills.length > 0 && lineData" class="card">
-    <div class="font-semibold text-xl mb-4">Income vs Expense</div>
-    <div style="height: 22rem">
-      <Chart type="line" :data="lineData" :options="lineOptions ?? undefined" />
+  <div v-if="!loading && !error && filteredBills.length > 0" class="chart-row">
+    <div v-if="lineData" class="card">
+      <div class="font-semibold text-xl mb-4">Income vs Expense</div>
+      <div style="height: 22rem">
+        <Chart type="line" :data="lineData" :options="lineOptions ?? undefined" />
+      </div>
     </div>
-  </div>
 
-  <div v-if="!loading && !error && filteredBills.length > 0 && pieData" class="card">
-    <div class="font-semibold text-xl mb-4">Total Income vs Total Expense</div>
-    <div style="height: 22rem">
-      <Chart type="pie" :data="pieData" :options="pieOptions ?? undefined" />
+    <div v-if="pieData" class="card">
+      <div class="font-semibold text-xl mb-4">Total Income vs Total Expense</div>
+      <div style="height: 22rem">
+        <Chart type="pie" :data="pieData" :options="pieOptions ?? undefined" />
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

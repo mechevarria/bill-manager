@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Button from 'primevue/button'
+import Toolbar from 'primevue/toolbar'
 import Chip from 'primevue/chip'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
@@ -115,9 +116,9 @@ function clearAll() {
   result.value = null
 }
 
-const facetCategories = computed(() => result.value?.facets.categories ?? [])
-const facetYears = computed(() => result.value?.facets.years ?? [])
-const facetPrices = computed(() => result.value?.facets.priceBuckets ?? [])
+const filterCategories = computed(() => result.value?.facets.categories ?? [])
+const filterYears = computed(() => result.value?.facets.years ?? [])
+const filterPrices = computed(() => result.value?.facets.priceBuckets ?? [])
 
 function fmtCurrency(value: number | null | undefined): string {
   if (value == null) return ''
@@ -141,29 +142,37 @@ function amountClass(value: number | null | undefined, category: string): string
   <div class="card">
     <div class="font-semibold text-xl mb-4">Search</div>
 
-    <form class="flex items-center gap-2 mb-4" @submit.prevent="submitText">
-      <Select
-        v-model="operator"
-        :options="operatorOptions"
-        option-label="label"
-        option-value="value"
-        size="small"
-        style="min-width: 12rem"
-      />
-      <InputText
-        v-model="queryInput"
-        placeholder="Search descriptions…"
-        size="small"
-        style="flex: 1"
-      />
-      <Button
-        type="submit"
-        label="Search"
-        icon="pi pi-search"
-        size="small"
-        :loading="loading"
-        :disabled="queryInput.trim().length < 2"
-      />
+    <form class="mb-4" @submit.prevent="submitText">
+      <Toolbar>
+        <template #start>
+          <div class="flex items-center gap-2">
+            <Select
+              v-model="operator"
+              :options="operatorOptions"
+              option-label="label"
+              option-value="value"
+              size="small"
+              style="min-width: 12rem"
+            />
+            <InputText
+              v-model="queryInput"
+              placeholder="Search terms…"
+              size="small"
+              style="min-width: 16rem"
+            />
+          </div>
+        </template>
+        <template #end>
+          <Button
+            type="submit"
+            label="Search"
+            icon="pi pi-search"
+            size="small"
+            :loading="loading"
+            :disabled="queryInput.trim().length < 2"
+          />
+        </template>
+      </Toolbar>
     </form>
 
     <div v-if="params.length > 0" class="flex items-center gap-2 mb-2" style="flex-wrap: wrap">
@@ -181,54 +190,54 @@ function amountClass(value: number | null | undefined, category: string): string
     <div v-else-if="!result && !loading" class="empty-state">
       <i class="pi pi-search" />
       <div class="empty-state-title">Search bills, expenses, and credit-card details</div>
-      <div>Type a description and press <b>Search</b>, or drill in from a facet after your first query.</div>
+      <div>Type a description and press <b>Search</b>, or drill in from a filter after your first query.</div>
     </div>
   </div>
 
   <div v-if="result" class="search-layout">
-    <!-- Sidebar facets -->
+    <!-- Sidebar filters -->
     <div class="card">
-      <div class="font-semibold text-base mb-4">Facets</div>
+      <div class="font-semibold text-base mb-4">Filter</div>
       <Accordion :value="['cat']" multiple>
         <AccordionPanel value="cat">
           <AccordionHeader>Category</AccordionHeader>
           <AccordionContent>
-            <ul class="facet-list">
-              <li v-for="f in facetCategories" :key="f.label">
-                <button class="facet-link" @click="drilldownCategory(f.label)">
+            <ul class="filter-list">
+              <li v-for="f in filterCategories" :key="f.label">
+                <button class="filter-link" @click="drilldownCategory(f.label)">
                   <span>{{ f.label }}</span>
-                  <span class="facet-count">{{ f.count }}</span>
+                  <span class="filter-count">{{ f.count }}</span>
                 </button>
               </li>
-              <li v-if="facetCategories.length === 0" class="facet-empty">No categories</li>
+              <li v-if="filterCategories.length === 0" class="filter-empty">No categories</li>
             </ul>
           </AccordionContent>
         </AccordionPanel>
         <AccordionPanel value="year">
           <AccordionHeader>Year</AccordionHeader>
           <AccordionContent>
-            <ul class="facet-list">
-              <li v-for="f in facetYears" :key="f.label">
-                <button class="facet-link" @click="drilldownYear(f.label)">
+            <ul class="filter-list">
+              <li v-for="f in filterYears" :key="f.label">
+                <button class="filter-link" @click="drilldownYear(f.label)">
                   <span>{{ yearFor(f.label) }}</span>
-                  <span class="facet-count">{{ f.count }}</span>
+                  <span class="filter-count">{{ f.count }}</span>
                 </button>
               </li>
-              <li v-if="facetYears.length === 0" class="facet-empty">No years</li>
+              <li v-if="filterYears.length === 0" class="filter-empty">No years</li>
             </ul>
           </AccordionContent>
         </AccordionPanel>
         <AccordionPanel value="price">
           <AccordionHeader>Amount</AccordionHeader>
           <AccordionContent>
-            <ul class="facet-list">
-              <li v-for="f in facetPrices" :key="f.label">
-                <button class="facet-link" @click="drilldownPrice(f.label)">
+            <ul class="filter-list">
+              <li v-for="f in filterPrices" :key="f.label">
+                <button class="filter-link" @click="drilldownPrice(f.label)">
                   <span>{{ priceLabel(f.label) }}</span>
-                  <span class="facet-count">{{ f.count }}</span>
+                  <span class="filter-count">{{ f.count }}</span>
                 </button>
               </li>
-              <li v-if="facetPrices.length === 0" class="facet-empty">No buckets</li>
+              <li v-if="filterPrices.length === 0" class="filter-empty">No buckets</li>
             </ul>
           </AccordionContent>
         </AccordionPanel>
@@ -304,7 +313,7 @@ function amountClass(value: number | null | undefined, category: string): string
     grid-template-columns: 1fr;
   }
 }
-.facet-list {
+.filter-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -312,7 +321,7 @@ function amountClass(value: number | null | undefined, category: string): string
   flex-direction: column;
   gap: 0.125rem;
 }
-.facet-link {
+.filter-link {
   width: 100%;
   display: flex;
   align-items: center;
@@ -326,14 +335,14 @@ function amountClass(value: number | null | undefined, category: string): string
   font-size: 0.85rem;
   text-align: left;
 }
-.facet-link:hover {
+.filter-link:hover {
   background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
 }
-.facet-count {
+.filter-count {
   color: var(--p-text-muted-color);
   font-variant-numeric: tabular-nums;
 }
-.facet-empty {
+.filter-empty {
   color: var(--p-text-muted-color);
   font-size: 0.85rem;
   padding: 0.5rem;
