@@ -25,9 +25,14 @@ const router = createRouter({
       component: () => import('@/views/SearchView.vue'),
     },
     {
-      path: '/system',
-      name: 'system',
+      path: '/defaults',
+      name: 'defaults',
       component: () => import('@/views/SystemView.vue'),
+    },
+    {
+      path: '/data',
+      name: 'data',
+      component: () => import('@/views/DataView.vue'),
     },
     // Legacy redirects
     { path: '/bills', redirect: '/' },
