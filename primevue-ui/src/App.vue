@@ -21,7 +21,8 @@ const navItems: NavItem[] = [
   { to: '/', label: 'Bills', icon: 'pi pi-list' },
   { to: '/chart', label: 'Chart', icon: 'pi pi-chart-line' },
   { to: '/search', label: 'Search', icon: 'pi pi-search' },
-  { to: '/system', label: 'System', icon: 'pi pi-cog' },
+  { to: '/defaults', label: 'Defaults', icon: 'pi pi-cog' },
+  { to: '/data', label: 'Data', icon: 'pi pi-database' },
 ]
 
 const containerClass = computed(() => ({
