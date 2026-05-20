@@ -55,6 +55,11 @@ public class BillController {
 
     @PutMapping("/bill/{id}")
     public Bill update(@RequestBody Bill bill, @PathVariable String id) {
+        bill.getExpenses().forEach(e -> {
+            if (e.getDetails() != null) {
+                e.getDetails().forEach(d -> d.setId(0L));
+            }
+        });
         return billService.save(bill);
     }
 
