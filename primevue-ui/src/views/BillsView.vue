@@ -165,8 +165,7 @@ const skeletonRows = Array.from({ length: 5 }, (_, i) => ({ id: -1 - i }))
       :rows-per-page-options="[5, 10, 25]"
       :total-records="totalRecords"
       :loading="loading"
-      paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-      current-page-report-template="Showing {first} to {last} of {totalRecords} bills"
+      paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
       removable-sort
       :sort-field="sortField"
       :sort-order="sortOrder === 'desc' ? -1 : 1"
