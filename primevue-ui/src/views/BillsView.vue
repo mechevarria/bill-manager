@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import Tooltip from 'primevue/tooltip'
+
+const vTooltip = Tooltip
 import DataTable, { type DataTablePageEvent, type DataTableSortEvent } from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -96,6 +99,12 @@ function amountClass(value: number | null | undefined): string {
   return value > 0 ? 'amount-positive' : 'amount-negative'
 }
 
+function incomeRatio(bill: Bill): number {
+  const total = (bill.totalIncome ?? 0) + (bill.totalExpense ?? 0)
+  if (total === 0) return 0
+  return Math.min(1, Math.max(0, (bill.totalIncome ?? 0) / total))
+}
+
 const skeletonRows = Array.from({ length: 5 }, (_, i) => ({ id: -1 - i }))
 
 const newBillDialogVisible = ref(false)
@@ -157,7 +166,7 @@ async function confirmAddBill() {
     } as unknown as Bill)
     newBillDialogVisible.value = false
     notify.success(`Bill created: ${newBill.month} ${newBill.year}`)
-    router.push({ name: 'bill-edit', params: { id: newBill.id } })
+    router.push({ name: 'bill-edit', params: { id: newBill.id }, state: { isNew: true } })
   } catch (e) {
     notify.error(e instanceof Error ? e.message : String(e))
   } finally {
@@ -188,6 +197,7 @@ async function confirmAddBill() {
       <Column header="Year"><template #body><Skeleton /></template></Column>
       <Column header="Income"><template #body><Skeleton /></template></Column>
       <Column header="Expense"><template #body><Skeleton /></template></Column>
+      <Column header="Ratio" style="min-width: 8rem"><template #body><Skeleton /></template></Column>
       <Column header="Actions" style="min-width: 12rem">
         <template #body>
           <Skeleton shape="circle" size="2.5rem" />
@@ -242,6 +252,19 @@ async function confirmAddBill() {
           <span :class="data.totalExpense > 0 ? 'amount-negative' : 'amount-neutral'">
             {{ formatCurrency(data.totalExpense) }}
           </span>
+        </template>
+      </Column>
+      <Column header="Ratio" style="min-width: 8rem">
+        <template #body="{ data }">
+          <div
+            v-tooltip.top="`Income: ${(incomeRatio(data) * 100).toFixed(0)}% / Expense: ${((1 - incomeRatio(data)) * 100).toFixed(0)}%`"
+            style="display: flex; align-items: center; height: 100%"
+          >
+            <div class="ratio-bar" style="flex: 1">
+              <div :style="{ width: (incomeRatio(data) * 100) + '%', background: '#22c55ecc' }" />
+              <div :style="{ width: ((1 - incomeRatio(data)) * 100) + '%', background: '#ef4444cc' }" />
+            </div>
+          </div>
         </template>
       </Column>
       <Column header="" style="width: 4rem">
@@ -300,3 +323,11 @@ async function confirmAddBill() {
   </Dialog>
 </template>
 
+<style scoped>
+.ratio-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+</style>
