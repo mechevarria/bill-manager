@@ -108,7 +108,7 @@ public class BillService {
     public long deleteAll() {
         try {
             long count = repository.count();
-            repository.deleteAllInBatch();
+            repository.deleteAll();
             return count;
         } catch (Exception ex) {
             throw new ApiException("Could not delete all bills", ex);
