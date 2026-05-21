@@ -45,8 +45,8 @@ type ChartOptions = Record<string, unknown>
 
 const lineData = ref<ChartData | null>(null)
 const lineOptions = ref<ChartOptions | null>(null)
-const pieData = ref<ChartData | null>(null)
-const pieOptions = ref<ChartOptions | null>(null)
+const barData = ref<ChartData | null>(null)
+const barOptions = ref<ChartOptions | null>(null)
 
 function token(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -55,10 +55,6 @@ function token(name: string): string {
 function rebuildCharts() {
   const primary500 = token('--p-primary-500')
   const primary200 = token('--p-primary-200')
-  const indigo500 = token('--p-indigo-500')
-  const indigo400 = token('--p-indigo-400')
-  const purple500 = token('--p-purple-500')
-  const purple400 = token('--p-purple-400')
   const textColor = token('--p-text-color')
   const textMuted = token('--p-text-muted-color')
   const surfaceBorder = token('--p-content-border-color')
@@ -121,18 +117,23 @@ function rebuildCharts() {
   const totalIncome = filteredBills.value.reduce((s, b) => s + (b.totalIncome ?? 0), 0)
   const totalExpense = filteredBills.value.reduce((s, b) => s + (b.totalExpense ?? 0), 0)
 
-  pieData.value = {
-    labels: ['Total Income', 'Total Expense'],
+  barData.value = {
+    labels: ['Totals'],
     datasets: [
       {
-        data: [totalIncome, totalExpense],
-        backgroundColor: [indigo500, purple500],
-        hoverBackgroundColor: [indigo400, purple400],
+        label: 'Income',
+        data: [totalIncome],
+        backgroundColor: primary500,
+      },
+      {
+        label: 'Expense',
+        data: [totalExpense],
+        backgroundColor: primary200,
       },
     ],
   }
 
-  pieOptions.value = {
+  barOptions.value = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -141,9 +142,22 @@ function rebuildCharts() {
       },
       tooltip: {
         callbacks: {
-          label: (ctx: { label: string; parsed: number }) =>
-            `${ctx.label}: $${ctx.parsed.toFixed(2)}`,
+          label: (ctx: { dataset: { label?: string }; parsed: { y: number } }) =>
+            `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`,
         },
+      },
+    },
+    scales: {
+      x: {
+        ticks: { color: textMuted, font: { weight: 500 } },
+        grid: { color: surfaceBorder, drawBorder: false },
+      },
+      y: {
+        ticks: {
+          color: textMuted,
+          callback: (value: number | string) => `$${value}`,
+        },
+        grid: { color: surfaceBorder, drawBorder: false },
       },
     },
   }
@@ -208,10 +222,10 @@ watch(
       </div>
     </div>
 
-    <div v-if="pieData" class="card">
+    <div v-if="barData" class="card">
       <div class="font-semibold text-xl mb-4">Total Income vs Total Expense</div>
       <div style="height: 22rem">
-        <Chart type="pie" :data="pieData" :options="pieOptions ?? undefined" />
+        <Chart type="bar" :data="barData" :options="barOptions ?? undefined" />
       </div>
     </div>
   </div>
