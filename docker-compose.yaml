@@ -19,7 +19,7 @@ services:
       retries: 20
 
   springboot:
-    image: quay.io/mechevarria/springboot-billmanager:latest
+    build: ./springboot-api
     container_name: springboot
     environment:
       HOST: mysql
