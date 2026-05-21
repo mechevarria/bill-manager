@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import Tooltip from 'primevue/tooltip'
+
+const vTooltip = Tooltip
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Toolbar from 'primevue/toolbar'
@@ -45,6 +48,31 @@ const colorSwatches: Record<string, string> = {
   danger: '#ef4444',
 }
 
+const owner1Color = computed(() => (colorSwatches[owner1.value?.color ?? ''] ?? '#6b7280') + '80')
+const owner2Color = computed(() => (colorSwatches[owner2.value?.color ?? ''] ?? '#6b7280') + '80')
+
+const balanceBarData = computed(() => {
+  const s = summaryResult.value
+  if (!s) return null
+  const bal = Math.abs(s.owner1Owe)
+  const total = s.owner1Due + s.owner2Due
+  if (total === 0) return null
+  const owner1Receives = s.owner1Owe < 0
+  const w1 = (owner1Receives ? s.owner1Due : s.owner1Paid) / total
+  const wBal = bal / total
+  const w2 = (owner1Receives ? s.owner2Paid : s.owner2Due) / total
+  const receiverLabel = owner1Receives ? owner1.value?.label : owner2.value?.label
+  return {
+    w1,
+    wBal,
+    w2,
+    balColor: '#22c55e80',
+    tip1: `${owner1.value?.label}: ${(w1 * 100).toFixed(0)}%`,
+    tipBal: `Transfer → ${receiverLabel}: ${(wBal * 100).toFixed(0)}%`,
+    tip2: `${owner2.value?.label}: ${(w2 * 100).toFixed(0)}%`,
+  }
+})
+
 function rowStyleForOwner(ownerName: string): Record<string, string> {
   const owner = owners.value.find((o) => o.name === ownerName)
   if (!owner?.color) return {}
@@ -85,6 +113,8 @@ interface Summary {
   owner1Income: number
   owner2Income: number
   totalIncome: number
+  incomePercent1: number
+  incomePercent2: number
   owner1Personal: number
   owner2Personal: number
   totalPersonal: number
@@ -92,8 +122,14 @@ interface Summary {
   totalShared: number
   owner1Shared: number
   owner2Shared: number
+  owner1Due: number
+  owner2Due: number
+  duePercent1: number
+  duePercent2: number
   owner1Paid: number
   owner2Paid: number
+  paidPercent1: number
+  paidPercent2: number
   owner1Owe: number
   owner2Owe: number
   percentText: string
@@ -125,8 +161,17 @@ function computeSummary(): Summary | null {
   const owner1Shared = p1 * totalShared
   const owner2Shared = p2 * totalShared
 
+  const owner1Due = owner1Personal + owner1Shared
+  const owner2Due = owner2Personal + owner2Shared
+  const totalDue = owner1Due + owner2Due
+  const duePercent1 = totalDue > 0 ? owner1Due / totalDue : 0
+  const duePercent2 = totalDue > 0 ? owner2Due / totalDue : 0
+
   const owner1Paid = sumPaidBy(o1.name, b.expenses)
   const owner2Paid = sumPaidBy(o2.name, b.expenses)
+  const totalPaid = owner1Paid + owner2Paid
+  const paidPercent1 = totalPaid > 0 ? owner1Paid / totalPaid : 0
+  const paidPercent2 = totalPaid > 0 ? owner2Paid / totalPaid : 0
 
   const owner1Owe = round(owner1Personal + owner1Shared - owner1Paid)
   const owner2Owe = round(owner2Personal + owner2Shared - owner2Paid)
@@ -135,9 +180,9 @@ function computeSummary(): Summary | null {
 
   let settlement: string
   if (owner1Owe < owner2Owe) {
-    settlement = `${o2.label} owes ${o1.label} $${Math.abs(round(owner2Owe))}`
+    settlement = `${o2.label} owes ${o1.label} ${fmt(Math.abs(round(owner2Owe)))}`
   } else if (owner2Owe < owner1Owe) {
-    settlement = `${o1.label} owes ${o2.label} $${Math.abs(round(owner1Owe))}`
+    settlement = `${o1.label} owes ${o2.label} ${fmt(Math.abs(round(owner1Owe)))}`
   } else {
     settlement = 'Settled'
   }
@@ -146,6 +191,8 @@ function computeSummary(): Summary | null {
     owner1Income,
     owner2Income,
     totalIncome,
+    incomePercent1: p1,
+    incomePercent2: p2,
     owner1Personal,
     owner2Personal,
     totalPersonal,
@@ -153,8 +200,14 @@ function computeSummary(): Summary | null {
     totalShared,
     owner1Shared,
     owner2Shared,
+    owner1Due,
+    owner2Due,
+    duePercent1,
+    duePercent2,
     owner1Paid,
     owner2Paid,
+    paidPercent1,
+    paidPercent2,
     owner1Owe,
     owner2Owe,
     percentText,
@@ -429,12 +482,12 @@ function fmt(value: number | null | undefined): string {
     style="width: 44rem"
   >
     <template v-if="summaryResult">
-      <div class="font-semibold text-lg mb-2">{{ summaryResult.settlement }}</div>
-      <p class="text-muted-color text-sm mb-4">{{ summaryResult.percentText }}</p>
+      <div class="font-semibold text-lg mb-4">{{ summaryResult.settlement }}</div>
       <table class="summary-grid">
         <thead>
           <tr>
             <th></th>
+            <th class="bar-col"></th>
             <th>{{ owner1?.label }}</th>
             <th>{{ owner2?.label }}</th>
             <th>Total</th>
@@ -443,35 +496,61 @@ function fmt(value: number | null | undefined): string {
         <tbody>
           <tr>
             <th>Income</th>
+            <td>
+              <div class="summary-bar">
+                <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
+                <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
+              </div>
+            </td>
             <td>{{ fmt(summaryResult.owner1Income) }}</td>
             <td>{{ fmt(summaryResult.owner2Income) }}</td>
             <td>{{ fmt(summaryResult.totalIncome) }}</td>
           </tr>
           <tr>
             <th>Personal expenses</th>
+            <td></td>
             <td>{{ fmt(summaryResult.owner1Personal) }}</td>
             <td>{{ fmt(summaryResult.owner2Personal) }}</td>
             <td>{{ fmt(summaryResult.totalPersonal) }}</td>
           </tr>
           <tr>
-            <th>Shared portion</th>
-            <td>{{ fmt(summaryResult.owner1Shared) }}</td>
-            <td>{{ fmt(summaryResult.owner2Shared) }}</td>
-            <td>{{ fmt(summaryResult.totalShared) }}</td>
-          </tr>
-          <tr>
             <th>Paid (out of pocket)</th>
+            <td>
+              <div class="summary-bar">
+                <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.paidPercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent1 * 100) + '%', background: owner1Color }" />
+                <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.paidPercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent2 * 100) + '%', background: owner2Color }" />
+              </div>
+            </td>
             <td>{{ fmt(summaryResult.owner1Paid) }}</td>
             <td>{{ fmt(summaryResult.owner2Paid) }}</td>
             <td>{{ fmt(summaryResult.owner1Paid + summaryResult.owner2Paid) }}</td>
           </tr>
           <tr>
-            <th>Net owed</th>
+            <th>Shared + Personal</th>
+            <td>
+              <div class="summary-bar">
+                <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.duePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent1 * 100) + '%', background: owner1Color }" />
+                <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.duePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent2 * 100) + '%', background: owner2Color }" />
+              </div>
+            </td>
+            <td>{{ fmt(summaryResult.owner1Due) }}</td>
+            <td>{{ fmt(summaryResult.owner2Due) }}</td>
+            <td>{{ fmt(summaryResult.owner1Due + summaryResult.owner2Due) }}</td>
+          </tr>
+          <tr>
+            <th>Balance</th>
+            <td>
+              <div v-if="balanceBarData" class="summary-bar">
+                <div v-tooltip.top="balanceBarData.tip1" :style="{ width: (balanceBarData.w1 * 100) + '%', background: owner1Color }" />
+                <div v-tooltip.top="balanceBarData.tipBal" :style="{ width: (balanceBarData.wBal * 100) + '%', background: balanceBarData.balColor }" />
+                <div v-tooltip.top="balanceBarData.tip2" :style="{ width: (balanceBarData.w2 * 100) + '%', background: owner2Color }" />
+              </div>
+            </td>
             <td :class="{ 'amount-positive': summaryResult.owner1Owe < 0, 'amount-negative': summaryResult.owner1Owe > 0 }">
-              {{ fmt(summaryResult.owner1Owe) }}
+              {{ fmt(Math.abs(summaryResult.owner1Owe)) }}
             </td>
             <td :class="{ 'amount-positive': summaryResult.owner2Owe < 0, 'amount-negative': summaryResult.owner2Owe > 0 }">
-              {{ fmt(summaryResult.owner2Owe) }}
+              {{ fmt(Math.abs(summaryResult.owner2Owe)) }}
             </td>
             <td></td>
           </tr>
@@ -498,20 +577,37 @@ function fmt(value: number | null | undefined): string {
 .summary-grid {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.875rem;
 }
 .summary-grid th,
 .summary-grid td {
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.5rem;
   text-align: right;
-  border-bottom: 1px solid var(--p-content-border-color, #e5e7eb);
+  border-bottom: 1px solid var(--p-datatable-border-color);
 }
-.summary-grid thead th,
-.summary-grid tbody th {
+.summary-grid thead th {
+  background: var(--p-datatable-header-cell-background);
+  color: var(--p-datatable-header-cell-color);
+  border-bottom: 1px solid var(--p-datatable-header-cell-border-color);
   text-align: left;
   font-weight: 600;
 }
+.summary-grid thead th:not(:first-child) {
+  text-align: right;
+}
 .summary-grid tbody th {
+  text-align: left;
+  font-weight: 400;
   color: var(--p-text-muted-color);
+}
+.bar-col {
+  width: 6rem;
+}
+.summary-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
 }
 .amount-positive { color: #15803d; }
 .amount-negative { color: #b91c1c; }
