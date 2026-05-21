@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Tooltip from 'primevue/tooltip'
 
 const vTooltip = Tooltip
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Toolbar from 'primevue/toolbar'
-import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
@@ -50,6 +49,8 @@ const colorSwatches: Record<string, string> = {
 
 const owner1Color = computed(() => (colorSwatches[owner1.value?.color ?? ''] ?? '#6b7280') + '80')
 const owner2Color = computed(() => (colorSwatches[owner2.value?.color ?? ''] ?? '#6b7280') + '80')
+const owner1ColBg = computed(() => (colorSwatches[owner1.value?.color ?? ''] ?? '#6b7280') + '1a')
+const owner2ColBg = computed(() => (colorSwatches[owner2.value?.color ?? ''] ?? '#6b7280') + '1a')
 
 const balanceBarData = computed(() => {
   const s = summaryResult.value
@@ -137,7 +138,16 @@ interface Summary {
 }
 
 const summaryResult = ref<Summary | null>(null)
-const summaryDialogOpen = ref(false)
+const calcStale = ref(false)
+let calculating = false
+
+watch(
+  () => bill.value,
+  () => {
+    if (!calculating && summaryResult.value !== null) calcStale.value = true
+  },
+  { deep: true },
+)
 
 function computeSummary(): Summary | null {
   if (!bill.value || !owner1.value || !owner2.value) return null
@@ -226,6 +236,10 @@ async function load() {
   try {
     await defaultsStore.load()
     bill.value = await getBill(id)
+    if (!history.state?.isNew) {
+      const s = computeSummary()
+      if (s) summaryResult.value = s
+    }
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   } finally {
@@ -243,6 +257,7 @@ function addIncome() {
     description: '',
     amount: 0,
   } as unknown as Income)
+  nextTick(() => document.getElementById('income-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
 
 function addExpense() {
@@ -255,6 +270,7 @@ function addExpense() {
     hasDetails: false,
     details: [],
   } as unknown as Expense)
+  nextTick(() => document.getElementById('expense-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
 
 function confirmDeleteIncome(income: Income) {
@@ -330,8 +346,9 @@ async function save() {
 }
 
 function calculate() {
+  calculating = true
   const s = computeSummary()
-  if (!s || !bill.value) return
+  if (!s || !bill.value) { calculating = false; return }
   bill.value.owner1Income = s.owner1Income
   bill.value.owner2Income = s.owner2Income
   bill.value.totalIncome = s.totalIncome
@@ -341,7 +358,8 @@ function calculate() {
   bill.value.owner1Owe = s.owner1Owe
   bill.value.owner2Owe = s.owner2Owe
   summaryResult.value = s
-  summaryDialogOpen.value = true
+  calcStale.value = false
+  nextTick(() => { calculating = false })
 }
 
 function cancel() {
@@ -384,12 +402,167 @@ function fmt(value: number | null | undefined): string {
   </div>
 
   <template v-if="bill">
+    <!-- Calculations row -->
+    <div class="calc-row">
+      <div class="card">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="font-semibold text-base">Summary</span>
+          <i
+            v-if="calcStale"
+            v-tooltip.top="'Bill changed — click Calculate to refresh'"
+            class="pi pi-refresh"
+            style="color: #f97316; cursor: default"
+          />
+        </div>
+        <div v-if="!summaryResult" class="empty-state">
+          <i class="pi pi-chart-bar" />
+          <div class="empty-state-title">No summary yet</div>
+          <div>Click <b>Calculate</b> in the toolbar to run.</div>
+        </div>
+        <template v-else>
+          <div class="settlement-badge mb-4">{{ summaryResult.settlement }}</div>
+          <table class="summary-grid">
+            <thead>
+              <tr>
+                <th></th>
+                <th :style="{ background: owner1ColBg }">{{ owner1?.label }}</th>
+                <th :style="{ background: owner2ColBg }">{{ owner2?.label }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Income</th>
+                <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Income) }}</td>
+                <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Income) }}</td>
+              </tr>
+              <tr>
+                <th>Expenses</th>
+                <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Due) }}</td>
+                <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Due) }}</td>
+              </tr>
+              <tr>
+                <th>Net</th>
+                <td :style="{ background: owner1ColBg }" :class="summaryResult.owner1Income - summaryResult.owner1Due >= 0 ? 'amount-positive' : 'amount-negative'">
+                  {{ fmt(summaryResult.owner1Income - summaryResult.owner1Due) }}
+                </td>
+                <td :style="{ background: owner2ColBg }" :class="summaryResult.owner2Income - summaryResult.owner2Due >= 0 ? 'amount-positive' : 'amount-negative'">
+                  {{ fmt(summaryResult.owner2Income - summaryResult.owner2Due) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="font-semibold text-base">Calculations</span>
+          <i
+            v-if="calcStale"
+            v-tooltip.top="'Bill changed — click Calculate to refresh'"
+            class="pi pi-refresh"
+            style="color: #f97316; cursor: default"
+          />
+        </div>
+        <div v-if="!summaryResult" class="empty-state">
+          <i class="pi pi-calculator" />
+          <div class="empty-state-title">No calculations yet</div>
+          <div>Click <b>Calculate</b> in the toolbar to run.</div>
+        </div>
+        <table v-else class="summary-grid">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="bar-col"></th>
+              <th :style="{ background: owner1ColBg }">{{ owner1?.label }}</th>
+              <th :style="{ background: owner2ColBg }">{{ owner2?.label }}</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Income</th>
+              <td>
+                <div class="summary-bar">
+                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
+                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
+                </div>
+              </td>
+              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Income) }}</td>
+              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Income) }}</td>
+              <td>{{ fmt(summaryResult.totalIncome) }}</td>
+            </tr>
+            <tr>
+              <th>Paid (out of pocket)</th>
+              <td>
+                <div class="summary-bar">
+                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.paidPercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent1 * 100) + '%', background: owner1Color }" />
+                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.paidPercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent2 * 100) + '%', background: owner2Color }" />
+                </div>
+              </td>
+              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Paid) }}</td>
+              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Paid) }}</td>
+              <td>{{ fmt(summaryResult.owner1Paid + summaryResult.owner2Paid) }}</td>
+            </tr>
+            <tr>
+              <th>Shared expenses</th>
+              <td>
+                <div class="summary-bar">
+                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
+                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
+                </div>
+              </td>
+              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Shared) }}</td>
+              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Shared) }}</td>
+              <td>{{ fmt(summaryResult.totalShared) }}</td>
+            </tr>
+            <tr>
+              <th>Personal expenses</th>
+              <td></td>
+              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Personal) }}</td>
+              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Personal) }}</td>
+              <td>{{ fmt(summaryResult.totalPersonal) }}</td>
+            </tr>
+            <tr>
+              <th>Shared + Personal</th>
+              <td>
+                <div class="summary-bar">
+                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.duePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent1 * 100) + '%', background: owner1Color }" />
+                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.duePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent2 * 100) + '%', background: owner2Color }" />
+                </div>
+              </td>
+              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Due) }}</td>
+              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Due) }}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <th>Balance</th>
+              <td>
+                <div v-if="balanceBarData" class="summary-bar">
+                  <div v-tooltip.top="balanceBarData.tip1" :style="{ width: (balanceBarData.w1 * 100) + '%', background: owner1Color }" />
+                  <div v-tooltip.top="balanceBarData.tipBal" :style="{ width: (balanceBarData.wBal * 100) + '%', background: balanceBarData.balColor }" />
+                  <div v-tooltip.top="balanceBarData.tip2" :style="{ width: (balanceBarData.w2 * 100) + '%', background: owner2Color }" />
+                </div>
+              </td>
+              <td :style="{ background: owner1ColBg }" :class="{ 'amount-positive': summaryResult.owner1Owe < 0, 'amount-negative': summaryResult.owner1Owe > 0 }">
+                {{ fmt(Math.abs(summaryResult.owner1Owe)) }}
+              </td>
+              <td :style="{ background: owner2ColBg }" :class="{ 'amount-positive': summaryResult.owner2Owe < 0, 'amount-negative': summaryResult.owner2Owe > 0 }">
+                {{ fmt(Math.abs(summaryResult.owner2Owe)) }}
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Income -->
-    <div class="card">
+    <div id="income-section" class="card">
       <div class="font-semibold text-base mb-4">Income</div>
       <DataTable :value="bill.incomes" data-key="id" size="small" :row-style="incomeRowStyle">
         <template #footer>
-          <span class="text-muted-color text-sm">{{ bill.incomes.length }} total</span>
+          <span class="text-muted-color text-sm">{{ bill.incomes.length }} total &mdash; {{ fmt(bill.incomes.reduce((s, i) => s + (i.amount ?? 0), 0)) }}</span>
         </template>
         <template #empty>
           <div class="empty-state">
@@ -422,11 +595,11 @@ function fmt(value: number | null | undefined): string {
     </div>
 
     <!-- Expense -->
-    <div class="card">
+    <div id="expense-section" class="card">
       <div class="font-semibold text-base mb-4">Expense</div>
       <DataTable :value="bill.expenses" data-key="id" size="small" :row-style="expenseRowStyle">
         <template #footer>
-          <span class="text-muted-color text-sm">{{ bill.expenses.length }} total</span>
+          <span class="text-muted-color text-sm">{{ bill.expenses.length }} total &mdash; {{ fmt(bill.expenses.reduce((s, e) => s + (e.amount ?? 0), 0)) }}</span>
         </template>
         <template #empty>
           <div class="empty-state">
@@ -474,95 +647,6 @@ function fmt(value: number | null | undefined): string {
     </div>
   </template>
 
-  <Dialog
-    v-model:visible="summaryDialogOpen"
-    header="Summary"
-    modal
-    :draggable="false"
-    style="width: 44rem"
-  >
-    <template v-if="summaryResult">
-      <div class="font-semibold text-lg mb-4">{{ summaryResult.settlement }}</div>
-      <table class="summary-grid">
-        <thead>
-          <tr>
-            <th></th>
-            <th class="bar-col"></th>
-            <th>{{ owner1?.label }}</th>
-            <th>{{ owner2?.label }}</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Income</th>
-            <td>
-              <div class="summary-bar">
-                <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
-                <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
-              </div>
-            </td>
-            <td>{{ fmt(summaryResult.owner1Income) }}</td>
-            <td>{{ fmt(summaryResult.owner2Income) }}</td>
-            <td>{{ fmt(summaryResult.totalIncome) }}</td>
-          </tr>
-          <tr>
-            <th>Personal expenses</th>
-            <td></td>
-            <td>{{ fmt(summaryResult.owner1Personal) }}</td>
-            <td>{{ fmt(summaryResult.owner2Personal) }}</td>
-            <td>{{ fmt(summaryResult.totalPersonal) }}</td>
-          </tr>
-          <tr>
-            <th>Paid (out of pocket)</th>
-            <td>
-              <div class="summary-bar">
-                <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.paidPercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent1 * 100) + '%', background: owner1Color }" />
-                <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.paidPercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent2 * 100) + '%', background: owner2Color }" />
-              </div>
-            </td>
-            <td>{{ fmt(summaryResult.owner1Paid) }}</td>
-            <td>{{ fmt(summaryResult.owner2Paid) }}</td>
-            <td>{{ fmt(summaryResult.owner1Paid + summaryResult.owner2Paid) }}</td>
-          </tr>
-          <tr>
-            <th>Shared + Personal</th>
-            <td>
-              <div class="summary-bar">
-                <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.duePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent1 * 100) + '%', background: owner1Color }" />
-                <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.duePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent2 * 100) + '%', background: owner2Color }" />
-              </div>
-            </td>
-            <td>{{ fmt(summaryResult.owner1Due) }}</td>
-            <td>{{ fmt(summaryResult.owner2Due) }}</td>
-            <td>{{ fmt(summaryResult.owner1Due + summaryResult.owner2Due) }}</td>
-          </tr>
-          <tr>
-            <th>Balance</th>
-            <td>
-              <div v-if="balanceBarData" class="summary-bar">
-                <div v-tooltip.top="balanceBarData.tip1" :style="{ width: (balanceBarData.w1 * 100) + '%', background: owner1Color }" />
-                <div v-tooltip.top="balanceBarData.tipBal" :style="{ width: (balanceBarData.wBal * 100) + '%', background: balanceBarData.balColor }" />
-                <div v-tooltip.top="balanceBarData.tip2" :style="{ width: (balanceBarData.w2 * 100) + '%', background: owner2Color }" />
-              </div>
-            </td>
-            <td :class="{ 'amount-positive': summaryResult.owner1Owe < 0, 'amount-negative': summaryResult.owner1Owe > 0 }">
-              {{ fmt(Math.abs(summaryResult.owner1Owe)) }}
-            </td>
-            <td :class="{ 'amount-positive': summaryResult.owner2Owe < 0, 'amount-negative': summaryResult.owner2Owe > 0 }">
-              {{ fmt(Math.abs(summaryResult.owner2Owe)) }}
-            </td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-    </template>
-    <template #footer>
-      <Button label="Close" severity="secondary" size="small" @click="summaryDialogOpen = false" />
-      <Button label="Save" icon="pi pi-check" size="small" :loading="saving" @click="save" />
-    </template>
-  </Dialog>
-
   <DetailsDialog
     v-if="editingExpense"
     v-model:visible="detailsDialogOpen"
@@ -574,6 +658,17 @@ function fmt(value: number | null | undefined): string {
 </template>
 
 <style scoped>
+.calc-row {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+@media (max-width: 768px) {
+  .calc-row {
+    grid-template-columns: 1fr;
+  }
+}
 .summary-grid {
   width: 100%;
   border-collapse: collapse;
@@ -608,6 +703,14 @@ function fmt(value: number | null | undefined): string {
   height: 6px;
   border-radius: 3px;
   overflow: hidden;
+}
+.settlement-badge {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 6px;
 }
 .amount-positive { color: #15803d; }
 .amount-negative { color: #b91c1c; }
