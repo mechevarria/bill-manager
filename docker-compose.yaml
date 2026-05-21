@@ -1,3 +1,7 @@
+networks:
+  app-net:
+    driver: bridge
+
 services:
   mysql:
     image: mysql/mysql-server:latest
@@ -12,6 +16,8 @@ services:
       - "3306:3306"
     volumes:
       - ./mysql-data:/var/lib/mysql
+    networks:
+      - app-net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
@@ -25,14 +31,25 @@ services:
       HOST: mysql
     ports:
       - "8080:8080"
+    networks:
+      - app-net
     depends_on:
       mysql:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/summary 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   primevue:
     build: ./primevue-ui
     container_name: primevue
     ports:
       - "8000:80"
+    networks:
+      - app-net
     depends_on:
-      - springboot
+      springboot:
+        condition: service_healthy
