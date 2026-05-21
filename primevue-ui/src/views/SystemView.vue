@@ -42,6 +42,18 @@ function labelFor(value: string): string {
   return colorOptions.find((c) => c.value === value)?.label ?? value
 }
 
+function ownerRowStyle(owner: Owner) {
+  return { backgroundColor: swatchFor(owner.color) + '1a' }
+}
+
+function rowStyleForOwnerName(name: string) {
+  const color = store.defaults?.owners.find((o) => o.name === name)?.color ?? ''
+  return { backgroundColor: swatchFor(color) + '1a' }
+}
+
+function defaultIncomeRowStyle(income: DefaultIncome) { return rowStyleForOwnerName(income.owner) }
+function defaultExpenseRowStyle(expense: DefaultExpense) { return rowStyleForOwnerName(expense.paid) }
+
 onMounted(() => {
   store.load().catch(() => {
     /* error captured in store.error */
@@ -143,7 +155,7 @@ async function saveDefaults() {
   <!-- Owners -->
   <div v-if="store.defaults" class="card">
     <div class="font-semibold text-lg mb-4">Owners ({{ store.defaults.owners.length }})</div>
-    <DataTable :value="store.defaults.owners" data-key="id" size="small">
+    <DataTable :value="store.defaults.owners" data-key="id" size="small" :row-style="ownerRowStyle">
       <template #empty>
         <div class="empty-state">
           <i class="pi pi-users" />
@@ -206,7 +218,7 @@ async function saveDefaults() {
   <!-- Default Income -->
   <div v-if="store.defaults" class="card">
     <div class="font-semibold text-lg mb-4">Default Income ({{ store.defaults.incomes.length }})</div>
-    <DataTable :value="store.defaults.incomes" data-key="id" size="small">
+    <DataTable :value="store.defaults.incomes" data-key="id" size="small" :row-style="defaultIncomeRowStyle">
       <template #empty>
         <div class="empty-state">
           <i class="pi pi-wallet" />
@@ -262,7 +274,7 @@ async function saveDefaults() {
   <!-- Default Expenses -->
   <div v-if="store.defaults" class="card">
     <div class="font-semibold text-lg mb-4">Default Expenses ({{ store.defaults.expenses.length }})</div>
-    <DataTable :value="store.defaults.expenses" data-key="id" size="small">
+    <DataTable :value="store.defaults.expenses" data-key="id" size="small" :row-style="defaultExpenseRowStyle">
       <template #empty>
         <div class="empty-state">
           <i class="pi pi-receipt" />

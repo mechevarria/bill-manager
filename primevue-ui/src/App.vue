@@ -116,7 +116,7 @@ function isItemActive(to: string): boolean {
     <div class="layout-mask" @click="mobileActive = false" />
 
     <Toast position="top-right" />
-    <ConfirmDialog />
+    <ConfirmDialog :draggable="false" style="width: 22rem" />
   </div>
 </template>
 
