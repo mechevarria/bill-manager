@@ -235,12 +235,15 @@ async function load() {
   error.value = null
   try {
     await defaultsStore.load()
+    calculating = true
     bill.value = await getBill(id)
     if (!history.state?.isNew) {
       const s = computeSummary()
       if (s) summaryResult.value = s
     }
+    nextTick(() => { calculating = false })
   } catch (e) {
+    calculating = false
     error.value = e instanceof Error ? e.message : String(e)
   } finally {
     loading.value = false
