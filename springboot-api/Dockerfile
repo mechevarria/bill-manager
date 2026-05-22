@@ -11,7 +11,7 @@ WORKDIR /app
 COPY --from=build /app/target/springboot-api-*.jar app.jar
 EXPOSE 8080
 CMD ["java", \
-  "-Xms64m", "-Xmx256m", \
+  "-Xms128m", "-Xmx512m", \
   "-XX:TieredStopAtLevel=1", \
   "-XX:+UseSerialGC", \
   "-Djava.security.egd=file:/dev/./urandom", \
