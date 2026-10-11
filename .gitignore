@@ -24,3 +24,4 @@ target/
 .factorypath
 .settings
 test-data
+.DS_Store
