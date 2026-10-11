@@ -11,10 +11,16 @@ bill-manager/
 ├── primevue-ui/        # Vue 3 + PrimeVue frontend (active development)
 ├── springboot-api/     # Spring Boot REST API
 ├── mysql/              # MySQL init scripts
-├── client/             # Legacy client (not in active use)
 ├── docker-compose.yaml # Full stack local dev
 ├── docker-up.sh / docker-down.sh
 ```
+
+## Versioning & Releases
+
+Single project-wide semver, managed by release-please (`.github/workflows/release-please.yml`).
+- Commits **must** use Conventional Commits: `fix:` → patch, `feat:` → minor, `feat!:` / `BREAKING CHANGE:` footer → major. `chore:`, `docs:`, `refactor:` don't bump.
+- release-please maintains a Release PR on `master`; merging it tags `vX.Y.Z`, creates the GitHub Release, and updates `CHANGELOG.md`.
+- Never hand-edit versions. Files bumped automatically: `.release-please-manifest.json`, `springboot-api/pom.xml` (line marked `x-release-please-version`), `primevue-ui/package.json`, `primevue-ui/package-lock.json`.
 
 ## Frontend (`primevue-ui/`)
 
