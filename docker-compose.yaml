@@ -40,8 +40,6 @@ services:
     logging: *default-logging
     environment:
       HOST: mysql
-    ports:
-      - "8080:8080"
     networks:
       - app-net
     depends_on:
