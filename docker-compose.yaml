@@ -53,7 +53,11 @@ services:
       start_period: 30s
 
   primevue:
-    build: ./primevue-ui
+    build:
+      context: ./primevue-ui
+      args:
+        # Set PRIMEUI_LICENSE in a .env file next to this compose file (git-ignored)
+        VITE_PRIMEUI_LICENSE: ${PRIMEUI_LICENSE:-}
     container_name: primevue
     logging: *default-logging
     ports:

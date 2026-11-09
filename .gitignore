@@ -25,3 +25,4 @@ target/
 .settings
 test-data
 .DS_Store
+.env
