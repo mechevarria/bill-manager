@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+# Vite inlines VITE_* env vars at build time; ARGs are visible to RUN as env vars.
+ARG VITE_PRIMEUI_LICENSE
 RUN npm run build-only
 
 FROM nginx:alpine
