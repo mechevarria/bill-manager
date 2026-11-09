@@ -26,3 +26,4 @@ target/
 test-data
 .DS_Store
 .env
+*.sql.gz
