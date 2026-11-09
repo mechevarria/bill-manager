@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1](https://github.com/mechevarria/bill-manager/compare/v1.1.0...v1.1.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* don't export port 8080 since it conflicts with the admin console ([74e2e1c](https://github.com/mechevarria/bill-manager/commit/74e2e1c34706176ab5803e6d8b2c6998dd2f4c11))
+* make logging consistent with other services on nas ([85ef680](https://github.com/mechevarria/bill-manager/commit/85ef6807dbb39a85de2125904d07f5f56e7859f3))
+* performance fixes for mysql and moving to supported image ([1eaf024](https://github.com/mechevarria/bill-manager/commit/1eaf02489583fd1f329b6a5b7c3ba96231a3fb27))
+
 ## [1.1.0](https://github.com/mechevarria/bill-manager/compare/v1.0.0...v1.1.0) (2026-10-11)
 
 
