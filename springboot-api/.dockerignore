@@ -1,1 +1,6 @@
-target
+target/
+.idea/
+.vscode/
+*.iml
+*.log
+api-dev.sh

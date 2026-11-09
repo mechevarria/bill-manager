@@ -4,8 +4,11 @@ networks:
 
 services:
   mysql:
-    image: mysql/mysql-server:latest
+    image: mysql:8.4
     container_name: mysql
+    command:
+      - --performance-schema=OFF
+      - --innodb-buffer-pool-size=128M
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: billDb
