@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/mechevarria/bill-manager/compare/v1.1.1...v1.2.0) (2026-11-09)
+
+
+### Features
+
+* support the primevue license parameter ([fd6cd3b](https://github.com/mechevarria/bill-manager/commit/fd6cd3b2b770d89d59bf61cc5d84da3c92b3bb2b))
+* use latest lara default primevue styling. do not use custom colors ([ab9ce7c](https://github.com/mechevarria/bill-manager/commit/ab9ce7cf42d0a5c1ab9972ed302b48db1f41c488))
+
 ## [1.1.1](https://github.com/mechevarria/bill-manager/compare/v1.1.0...v1.1.1) (2026-11-09)
 
 
