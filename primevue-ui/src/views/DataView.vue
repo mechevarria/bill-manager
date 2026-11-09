@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Toolbar from 'primevue/toolbar'
 import Message from 'primevue/message'
@@ -154,33 +155,35 @@ async function doErase() {
 </script>
 
 <template>
-  <div class="card">
-    <div class="font-semibold text-xl mb-4">Data</div>
-    <Toolbar>
-      <template #start>
-        <div class="flex items-center gap-2">
-          <Button label="Export" icon="pi pi-download" outlined size="small" @click="doExport" />
-          <FileUpload
-            mode="basic"
-            accept="application/json,.json"
-            :auto="true"
-            choose-label="Import"
-            choose-icon="pi pi-upload"
-            custom-upload
-            :choose-button-props="{ size: 'small', outlined: true }"
-            @select="onImportFileSelect"
-          />
-        </div>
-      </template>
-      <template #end>
-        <Button label="Erase All" icon="pi pi-trash" severity="danger" size="small" @click="confirmErase" />
-      </template>
-    </Toolbar>
-    <p class="text-muted-color text-sm mt-4">
-      Export downloads all bills + defaults as JSON. Import expects the same shape and POSTs each bill.
-      Erase deletes every bill and clears default incomes/expenses.
-    </p>
-  </div>
+  <Card class="mb-4">
+    <template #title>Data</template>
+    <template #content>
+      <Toolbar>
+        <template #start>
+          <div class="flex items-center gap-2">
+            <Button label="Export" icon="pi pi-download" outlined size="small" @click="doExport" />
+            <FileUpload
+              mode="basic"
+              accept="application/json,.json"
+              :auto="true"
+              choose-label="Import"
+              choose-icon="pi pi-upload"
+              custom-upload
+              :choose-button-props="{ size: 'small', outlined: true }"
+              @select="onImportFileSelect"
+            />
+          </div>
+        </template>
+        <template #end>
+          <Button label="Erase All" icon="pi pi-trash" severity="danger" size="small" @click="confirmErase" />
+        </template>
+      </Toolbar>
+      <p class="text-muted-color text-sm mt-4">
+        Export downloads all bills + defaults as JSON. Import expects the same shape and POSTs each bill.
+        Erase deletes every bill and clears default incomes/expenses.
+      </p>
+    </template>
+  </Card>
 
   <!-- Export progress dialog -->
   <Dialog v-model:visible="exportOpen" header="Export" modal :style="{ width: '28rem' }">

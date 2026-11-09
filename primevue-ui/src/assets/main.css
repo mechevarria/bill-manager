@@ -1,13 +1,11 @@
-@import './base.css';
+/* All colors come from the PrimeVue theme (Lara + cyan primary, see main.ts).
+ * Use --p-* design tokens only — no hex/rgb literals. */
 
-:root {
-  --surface-ground: var(--p-surface-100);
-  --surface-card: var(--p-content-background);
-  --content-border-radius: 12px;
-}
-
-:root.app-dark {
-  --surface-ground: var(--p-surface-950);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
 }
 
 html,
@@ -17,27 +15,18 @@ body,
 }
 
 body {
-  background: var(--p-surface-50, #f8fafc);
-  color: var(--p-text-color, #1f2937);
+  background: var(--p-surface-50);
+  color: var(--p-text-color);
   font-family: 'Lato', sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--p-typography-font-size);
+  font-weight: var(--p-typography-font-weight);
+  line-height: var(--p-typography-line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-html.app-dark body {
-  background: var(--p-surface-950, #09090b);
-  color: var(--p-text-color, #f3f4f6);
-}
-
-/* Sakai-style content card: white surface, rounded, padded, subtle shadow */
-.card {
-  background: var(--p-content-background, #ffffff);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  box-shadow:
-    0 1px 2px 0 rgb(0 0 0 / 0.03),
-    0 1px 6px -1px rgb(0 0 0 / 0.02);
+.app-dark body {
+  background: var(--p-surface-950);
 }
 
 /* Minimal utility classes mirroring the Tailwind names Sakai's docs use,
@@ -49,7 +38,7 @@ html.app-dark body {
 .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
 .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
 .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-.text-muted-color { color: var(--p-text-muted-color, #6b7280); }
+.text-muted-color { color: var(--p-text-muted-color); }
 .mb-2 { margin-bottom: 0.5rem; }
 .mb-4 { margin-bottom: 1rem; }
 .mb-6 { margin-bottom: 1.5rem; }
@@ -69,9 +58,12 @@ html.app-dark body {
 }
 
 /* Amount color coding. Income / refunds = positive (green), expense = negative (red). */
-.amount-positive { color: var(--p-green-600, #16a34a); font-variant-numeric: tabular-nums; }
-.amount-negative { color: var(--p-red-600, #dc2626); font-variant-numeric: tabular-nums; }
-.amount-neutral  { color: var(--p-text-muted-color, #6b7280); font-variant-numeric: tabular-nums; }
+.amount-positive { color: var(--p-green-600); font-variant-numeric: tabular-nums; }
+.amount-negative { color: var(--p-red-600); font-variant-numeric: tabular-nums; }
+.amount-neutral  { color: var(--p-text-muted-color); font-variant-numeric: tabular-nums; }
+
+.app-dark .amount-positive { color: var(--p-green-400); }
+.app-dark .amount-negative { color: var(--p-red-400); }
 
 /* Empty-state block used in DataTable #empty slots */
 .empty-state {
@@ -80,15 +72,14 @@ html.app-dark body {
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  color: var(--p-text-muted-color, #6b7280);
+  color: var(--p-text-muted-color);
   gap: 0.5rem;
 }
 .empty-state .pi {
   font-size: 2rem;
-  color: var(--p-text-muted-color, #9ca3af);
+  color: var(--p-text-muted-color);
 }
 .empty-state-title {
   font-weight: 600;
-  font-size: 0.95rem;
   color: var(--p-text-color);
 }

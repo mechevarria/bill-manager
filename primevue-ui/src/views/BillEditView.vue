@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Card from 'primevue/card'
+import Tag from 'primevue/tag'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Tooltip from 'primevue/tooltip'
 
@@ -20,6 +22,7 @@ import { useDefaultsStore } from '@/stores/defaults'
 import { useNotify } from '@/composables/useNotify'
 import type { Bill, Detail, Expense, Income, Owner } from '@/types/api'
 import DetailsDialog from '@/components/DetailsDialog.vue'
+import { ownerColor, ownerHighlight, ownerRowStyle } from '@/utils/ownerColors'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,18 +42,10 @@ const ownerOptions = computed(() =>
   owners.value.map((o) => ({ label: o.label, value: o.name })),
 )
 
-const colorSwatches: Record<string, string> = {
-  active: '#64748b',
-  success: '#22c55e',
-  info: '#0ea5e9',
-  warning: '#f97316',
-  danger: '#ef4444',
-}
-
-const owner1Color = computed(() => (colorSwatches[owner1.value?.color ?? ''] ?? '#6b7280') + '80')
-const owner2Color = computed(() => (colorSwatches[owner2.value?.color ?? ''] ?? '#6b7280') + '80')
-const owner1ColBg = computed(() => (colorSwatches[owner1.value?.color ?? ''] ?? '#6b7280') + '1a')
-const owner2ColBg = computed(() => (colorSwatches[owner2.value?.color ?? ''] ?? '#6b7280') + '1a')
+const owner1Color = computed(() => ownerColor(owner1.value?.color))
+const owner2Color = computed(() => ownerColor(owner2.value?.color))
+const owner1ColBg = computed(() => ownerHighlight(owner1.value?.color))
+const owner2ColBg = computed(() => ownerHighlight(owner2.value?.color))
 
 const balanceBarData = computed(() => {
   const s = summaryResult.value
@@ -67,7 +62,7 @@ const balanceBarData = computed(() => {
     w1,
     wBal,
     w2,
-    balColor: '#22c55e80',
+    balColor: ownerColor('success'),
     tip1: `${owner1.value?.label}: ${(w1 * 100).toFixed(0)}%`,
     tipBal: `Transfer → ${receiverLabel}: ${(wBal * 100).toFixed(0)}%`,
     tip2: `${owner2.value?.label}: ${(w2 * 100).toFixed(0)}%`,
@@ -75,10 +70,7 @@ const balanceBarData = computed(() => {
 })
 
 function rowStyleForOwner(ownerName: string): Record<string, string> {
-  const owner = owners.value.find((o) => o.name === ownerName)
-  if (!owner?.color) return {}
-  const hex = colorSwatches[owner.color] ?? '#6b7280'
-  return { backgroundColor: hex + '1a' }
+  return ownerRowStyle(owners.value.find((o) => o.name === ownerName)?.color)
 }
 
 function incomeRowStyle(income: Income) { return rowStyleForOwner(income.owner) }
@@ -377,277 +369,287 @@ function fmt(value: number | null | undefined): string {
 
 <template>
   <!-- Header -->
-  <div class="card">
-    <div class="font-semibold text-xl mb-4">
-      Editing {{ bill ? `${bill.month} ${bill.year}` : `#${route.params.id}` }}
-    </div>
-    <Toolbar>
-      <template #start>
-        <div class="flex items-center gap-2">
-          <Button label="Add Income" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addIncome" />
-          <Button label="Add Expense" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addExpense" />
-          <Button label="Calculate" icon="pi pi-calculator" outlined size="small" :disabled="!bill" @click="calculate" />
-        </div>
-      </template>
-      <template #end>
-        <div class="flex items-center gap-2">
-          <Button label="Back" icon="pi pi-arrow-left" severity="secondary" text size="small" @click="cancel" />
-          <Button label="Save" icon="pi pi-check" :loading="saving" :disabled="!bill" size="small" @click="save" />
-        </div>
-      </template>
-    </Toolbar>
+  <Card class="mb-4">
+    <template #title>Editing {{ bill ? `${bill.month} ${bill.year}` : `#${route.params.id}` }}</template>
+    <template #content>
+      <Toolbar>
+        <template #start>
+          <div class="flex items-center gap-2">
+            <Button label="Add Income" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addIncome" />
+            <Button label="Add Expense" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addExpense" />
+            <Button label="Calculate" icon="pi pi-calculator" outlined size="small" :disabled="!bill" @click="calculate" />
+          </div>
+        </template>
+        <template #end>
+          <div class="flex items-center gap-2">
+            <Button label="Back" icon="pi pi-arrow-left" severity="secondary" text size="small" @click="cancel" />
+            <Button label="Save" icon="pi pi-check" :loading="saving" :disabled="!bill" size="small" @click="save" />
+          </div>
+        </template>
+      </Toolbar>
 
-    <ProgressSpinner v-if="loading" style="width: 2rem; height: 2rem; margin-top: 1rem" />
-    <Message v-else-if="error" severity="error" :closable="false" class="mt-4">{{ error }}</Message>
-    <Message v-else-if="bill && (!owner1 || !owner2)" severity="warn" :closable="false" class="mt-4">
-      System defaults need at least two owners. Visit the Defaults page to configure them.
-    </Message>
-  </div>
+      <ProgressSpinner v-if="loading" style="width: 2rem; height: 2rem; margin-top: 1rem" />
+      <Message v-else-if="error" severity="error" :closable="false" class="mt-4">{{ error }}</Message>
+      <Message v-else-if="bill && (!owner1 || !owner2)" severity="warn" :closable="false" class="mt-4">
+        System defaults need at least two owners. Visit the Defaults page to configure them.
+      </Message>
+    </template>
+  </Card>
 
   <template v-if="bill">
     <!-- Calculations row -->
     <div class="calc-row">
-      <div class="card">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="font-semibold text-base">Summary</span>
-          <i
-            v-if="calcStale"
-            v-tooltip.top="'Bill changed — click Calculate to refresh'"
-            class="pi pi-refresh"
-            style="color: #f97316; cursor: default"
-          />
-        </div>
-        <div v-if="!summaryResult" class="empty-state">
-          <i class="pi pi-chart-bar" />
-          <div class="empty-state-title">No summary yet</div>
-          <div>Click <b>Calculate</b> in the toolbar to run.</div>
-        </div>
-        <template v-else>
-          <div class="settlement-badge mb-4">{{ summaryResult.settlement }}</div>
-          <table class="summary-grid">
+      <Card class="mb-4">
+        <template #title>
+          <div class="flex items-center gap-2">
+            Summary
+            <i
+              v-if="calcStale"
+              v-tooltip.top="'Bill changed — click Calculate to refresh'"
+              class="pi pi-refresh stale-icon"
+            />
+          </div>
+        </template>
+        <template #content>
+          <div v-if="!summaryResult" class="empty-state">
+            <i class="pi pi-chart-bar" />
+            <div class="empty-state-title">No summary yet</div>
+            <div>Click <b>Calculate</b> in the toolbar to run.</div>
+          </div>
+          <template v-else>
+            <Tag :value="summaryResult.settlement" severity="secondary" class="mb-4" />
+            <table class="summary-grid">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th :style="{ background: owner1ColBg }">{{ owner1?.label }}</th>
+                  <th :style="{ background: owner2ColBg }">{{ owner2?.label }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>Income</th>
+                  <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Income) }}</td>
+                  <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Income) }}</td>
+                </tr>
+                <tr>
+                  <th>Expenses</th>
+                  <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Due) }}</td>
+                  <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Due) }}</td>
+                </tr>
+                <tr>
+                  <th>Net</th>
+                  <td :style="{ background: owner1ColBg }" :class="summaryResult.owner1Income - summaryResult.owner1Due >= 0 ? 'amount-positive' : 'amount-negative'">
+                    {{ fmt(summaryResult.owner1Income - summaryResult.owner1Due) }}
+                  </td>
+                  <td :style="{ background: owner2ColBg }" :class="summaryResult.owner2Income - summaryResult.owner2Due >= 0 ? 'amount-positive' : 'amount-negative'">
+                    {{ fmt(summaryResult.owner2Income - summaryResult.owner2Due) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+        </template>
+      </Card>
+
+      <Card class="mb-4">
+        <template #title>
+          <div class="flex items-center gap-2">
+            Calculations
+            <i
+              v-if="calcStale"
+              v-tooltip.top="'Bill changed — click Calculate to refresh'"
+              class="pi pi-refresh stale-icon"
+            />
+          </div>
+        </template>
+        <template #content>
+          <div v-if="!summaryResult" class="empty-state">
+            <i class="pi pi-calculator" />
+            <div class="empty-state-title">No calculations yet</div>
+            <div>Click <b>Calculate</b> in the toolbar to run.</div>
+          </div>
+          <table v-else class="summary-grid">
             <thead>
               <tr>
                 <th></th>
+                <th class="bar-col"></th>
                 <th :style="{ background: owner1ColBg }">{{ owner1?.label }}</th>
                 <th :style="{ background: owner2ColBg }">{{ owner2?.label }}</th>
+                <th>Total</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <th>Income</th>
+                <td>
+                  <div class="summary-bar">
+                    <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
+                    <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
+                  </div>
+                </td>
                 <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Income) }}</td>
                 <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Income) }}</td>
+                <td>{{ fmt(summaryResult.totalIncome) }}</td>
               </tr>
               <tr>
-                <th>Expenses</th>
+                <th>Paid (out of pocket)</th>
+                <td>
+                  <div class="summary-bar">
+                    <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.paidPercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent1 * 100) + '%', background: owner1Color }" />
+                    <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.paidPercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent2 * 100) + '%', background: owner2Color }" />
+                  </div>
+                </td>
+                <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Paid) }}</td>
+                <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Paid) }}</td>
+                <td>{{ fmt(summaryResult.owner1Paid + summaryResult.owner2Paid) }}</td>
+              </tr>
+              <tr>
+                <th>Shared expenses</th>
+                <td>
+                  <div class="summary-bar">
+                    <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
+                    <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
+                  </div>
+                </td>
+                <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Shared) }}</td>
+                <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Shared) }}</td>
+                <td>{{ fmt(summaryResult.totalShared) }}</td>
+              </tr>
+              <tr>
+                <th>Personal expenses</th>
+                <td></td>
+                <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Personal) }}</td>
+                <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Personal) }}</td>
+                <td>{{ fmt(summaryResult.totalPersonal) }}</td>
+              </tr>
+              <tr>
+                <th>Shared + Personal</th>
+                <td>
+                  <div class="summary-bar">
+                    <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.duePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent1 * 100) + '%', background: owner1Color }" />
+                    <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.duePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent2 * 100) + '%', background: owner2Color }" />
+                  </div>
+                </td>
                 <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Due) }}</td>
                 <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Due) }}</td>
+                <td></td>
               </tr>
               <tr>
-                <th>Net</th>
-                <td :style="{ background: owner1ColBg }" :class="summaryResult.owner1Income - summaryResult.owner1Due >= 0 ? 'amount-positive' : 'amount-negative'">
-                  {{ fmt(summaryResult.owner1Income - summaryResult.owner1Due) }}
+                <th>Balance</th>
+                <td>
+                  <div v-if="balanceBarData" class="summary-bar">
+                    <div v-tooltip.top="balanceBarData.tip1" :style="{ width: (balanceBarData.w1 * 100) + '%', background: owner1Color }" />
+                    <div v-tooltip.top="balanceBarData.tipBal" :style="{ width: (balanceBarData.wBal * 100) + '%', background: balanceBarData.balColor }" />
+                    <div v-tooltip.top="balanceBarData.tip2" :style="{ width: (balanceBarData.w2 * 100) + '%', background: owner2Color }" />
+                  </div>
                 </td>
-                <td :style="{ background: owner2ColBg }" :class="summaryResult.owner2Income - summaryResult.owner2Due >= 0 ? 'amount-positive' : 'amount-negative'">
-                  {{ fmt(summaryResult.owner2Income - summaryResult.owner2Due) }}
+                <td :style="{ background: owner1ColBg }" :class="{ 'amount-positive': summaryResult.owner1Owe < 0, 'amount-negative': summaryResult.owner1Owe > 0 }">
+                  {{ fmt(Math.abs(summaryResult.owner1Owe)) }}
                 </td>
+                <td :style="{ background: owner2ColBg }" :class="{ 'amount-positive': summaryResult.owner2Owe < 0, 'amount-negative': summaryResult.owner2Owe > 0 }">
+                  {{ fmt(Math.abs(summaryResult.owner2Owe)) }}
+                </td>
+                <td></td>
               </tr>
             </tbody>
           </table>
         </template>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="font-semibold text-base">Calculations</span>
-          <i
-            v-if="calcStale"
-            v-tooltip.top="'Bill changed — click Calculate to refresh'"
-            class="pi pi-refresh"
-            style="color: #f97316; cursor: default"
-          />
-        </div>
-        <div v-if="!summaryResult" class="empty-state">
-          <i class="pi pi-calculator" />
-          <div class="empty-state-title">No calculations yet</div>
-          <div>Click <b>Calculate</b> in the toolbar to run.</div>
-        </div>
-        <table v-else class="summary-grid">
-          <thead>
-            <tr>
-              <th></th>
-              <th class="bar-col"></th>
-              <th :style="{ background: owner1ColBg }">{{ owner1?.label }}</th>
-              <th :style="{ background: owner2ColBg }">{{ owner2?.label }}</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th>Income</th>
-              <td>
-                <div class="summary-bar">
-                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
-                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
-                </div>
-              </td>
-              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Income) }}</td>
-              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Income) }}</td>
-              <td>{{ fmt(summaryResult.totalIncome) }}</td>
-            </tr>
-            <tr>
-              <th>Paid (out of pocket)</th>
-              <td>
-                <div class="summary-bar">
-                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.paidPercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent1 * 100) + '%', background: owner1Color }" />
-                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.paidPercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.paidPercent2 * 100) + '%', background: owner2Color }" />
-                </div>
-              </td>
-              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Paid) }}</td>
-              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Paid) }}</td>
-              <td>{{ fmt(summaryResult.owner1Paid + summaryResult.owner2Paid) }}</td>
-            </tr>
-            <tr>
-              <th>Shared expenses</th>
-              <td>
-                <div class="summary-bar">
-                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.incomePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent1 * 100) + '%', background: owner1Color }" />
-                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.incomePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.incomePercent2 * 100) + '%', background: owner2Color }" />
-                </div>
-              </td>
-              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Shared) }}</td>
-              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Shared) }}</td>
-              <td>{{ fmt(summaryResult.totalShared) }}</td>
-            </tr>
-            <tr>
-              <th>Personal expenses</th>
-              <td></td>
-              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Personal) }}</td>
-              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Personal) }}</td>
-              <td>{{ fmt(summaryResult.totalPersonal) }}</td>
-            </tr>
-            <tr>
-              <th>Shared + Personal</th>
-              <td>
-                <div class="summary-bar">
-                  <div v-tooltip.top="`${owner1?.label}: ${(summaryResult.duePercent1 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent1 * 100) + '%', background: owner1Color }" />
-                  <div v-tooltip.top="`${owner2?.label}: ${(summaryResult.duePercent2 * 100).toFixed(0)}%`" :style="{ width: (summaryResult.duePercent2 * 100) + '%', background: owner2Color }" />
-                </div>
-              </td>
-              <td :style="{ background: owner1ColBg }">{{ fmt(summaryResult.owner1Due) }}</td>
-              <td :style="{ background: owner2ColBg }">{{ fmt(summaryResult.owner2Due) }}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <th>Balance</th>
-              <td>
-                <div v-if="balanceBarData" class="summary-bar">
-                  <div v-tooltip.top="balanceBarData.tip1" :style="{ width: (balanceBarData.w1 * 100) + '%', background: owner1Color }" />
-                  <div v-tooltip.top="balanceBarData.tipBal" :style="{ width: (balanceBarData.wBal * 100) + '%', background: balanceBarData.balColor }" />
-                  <div v-tooltip.top="balanceBarData.tip2" :style="{ width: (balanceBarData.w2 * 100) + '%', background: owner2Color }" />
-                </div>
-              </td>
-              <td :style="{ background: owner1ColBg }" :class="{ 'amount-positive': summaryResult.owner1Owe < 0, 'amount-negative': summaryResult.owner1Owe > 0 }">
-                {{ fmt(Math.abs(summaryResult.owner1Owe)) }}
-              </td>
-              <td :style="{ background: owner2ColBg }" :class="{ 'amount-positive': summaryResult.owner2Owe < 0, 'amount-negative': summaryResult.owner2Owe > 0 }">
-                {{ fmt(Math.abs(summaryResult.owner2Owe)) }}
-              </td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      </Card>
     </div>
 
     <!-- Income -->
-    <div id="income-section" class="card">
-      <div class="font-semibold text-base mb-4">Income</div>
-      <DataTable :value="bill.incomes" data-key="id" size="small" :row-style="incomeRowStyle">
-        <template #footer>
-          <span class="text-muted-color text-sm">{{ bill.incomes.length }} total &mdash; {{ fmt(bill.incomes.reduce((s, i) => s + (i.amount ?? 0), 0)) }}</span>
-        </template>
-        <template #empty>
-          <div class="empty-state">
-            <i class="pi pi-wallet" />
-            <div class="empty-state-title">No income rows</div>
-            <div>Use <b>Add Income</b> in the toolbar to record one.</div>
-          </div>
-        </template>
-        <Column header="Owner" style="width: 12rem">
-          <template #body="{ data }">
-            <Select v-model="data.owner" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
+    <Card id="income-section" class="mb-4">
+      <template #title>Income</template>
+      <template #content>
+        <DataTable :value="bill.incomes" data-key="id" size="small" striped-rows :row-style="incomeRowStyle">
+          <template #footer>
+            <span class="text-muted-color text-sm">{{ bill.incomes.length }} total &mdash; {{ fmt(bill.incomes.reduce((s, i) => s + (i.amount ?? 0), 0)) }}</span>
           </template>
-        </Column>
-        <Column header="Description">
-          <template #body="{ data }">
-            <InputText v-model="data.description" size="small" fluid />
-          </template>
-        </Column>
-        <Column header="Amount" style="width: 12rem">
-          <template #body="{ data }">
-            <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" size="small" fluid />
-          </template>
-        </Column>
-        <Column header="" style="width: 4rem">
-          <template #body="{ data }">
-            <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete income" @click="confirmDeleteIncome(data)" />
-          </template>
-        </Column>
-      </DataTable>
-    </div>
-
-    <!-- Expense -->
-    <div id="expense-section" class="card">
-      <div class="font-semibold text-base mb-4">Expense</div>
-      <DataTable :value="bill.expenses" data-key="id" size="small" :row-style="expenseRowStyle">
-        <template #footer>
-          <span class="text-muted-color text-sm">{{ bill.expenses.length }} total &mdash; {{ fmt(bill.expenses.reduce((s, e) => s + (e.amount ?? 0), 0)) }}</span>
-        </template>
-        <template #empty>
-          <div class="empty-state">
-            <i class="pi pi-receipt" />
-            <div class="empty-state-title">No expense rows</div>
-            <div>Use <b>Add Expense</b> in the toolbar to record one. Toggle <b>Has details</b> to attach line items.</div>
-          </div>
-        </template>
-        <Column header="Name">
-          <template #body="{ data }">
-            <InputText v-model="data.name" size="small" fluid />
-          </template>
-        </Column>
-        <Column header="Paid by" style="width: 12rem">
-          <template #body="{ data }">
-            <Select v-model="data.paid" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
-          </template>
-        </Column>
-        <Column header="Amount" style="width: 12rem">
-          <template #body="{ data }">
-            <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" :disabled="data.hasDetails" size="small" fluid />
-          </template>
-        </Column>
-        <Column header="Details" style="width: 14rem">
-          <template #body="{ data }">
-            <div class="flex items-center gap-2">
-              <ToggleSwitch :model-value="data.hasDetails" @update:model-value="toggleHasDetails(data, $event)" />
-              <Button
-                v-if="data.hasDetails"
-                icon="pi pi-list"
-                severity="secondary"
-                size="small"
-                :label="`${(data.details || []).length}`"
-                @click="openDetails(data)"
-              />
+          <template #empty>
+            <div class="empty-state">
+              <i class="pi pi-wallet" />
+              <div class="empty-state-title">No income rows</div>
+              <div>Use <b>Add Income</b> in the toolbar to record one.</div>
             </div>
           </template>
-        </Column>
-        <Column header="" style="width: 4rem">
-          <template #body="{ data }">
-            <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete expense" @click="confirmDeleteExpense(data)" />
+          <Column header="Owner" style="width: 12rem">
+            <template #body="{ data }">
+              <Select v-model="data.owner" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
+            </template>
+          </Column>
+          <Column header="Description">
+            <template #body="{ data }">
+              <InputText v-model="data.description" size="small" fluid />
+            </template>
+          </Column>
+          <Column header="Amount" style="width: 12rem">
+            <template #body="{ data }">
+              <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" size="small" fluid />
+            </template>
+          </Column>
+          <Column header="" style="width: 4rem">
+            <template #body="{ data }">
+              <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete income" @click="confirmDeleteIncome(data)" />
+            </template>
+          </Column>
+        </DataTable>
+      </template>
+    </Card>
+
+    <!-- Expense -->
+    <Card id="expense-section" class="mb-4">
+      <template #title>Expense</template>
+      <template #content>
+        <DataTable :value="bill.expenses" data-key="id" size="small" striped-rows :row-style="expenseRowStyle">
+          <template #footer>
+            <span class="text-muted-color text-sm">{{ bill.expenses.length }} total &mdash; {{ fmt(bill.expenses.reduce((s, e) => s + (e.amount ?? 0), 0)) }}</span>
           </template>
-        </Column>
-      </DataTable>
-    </div>
+          <template #empty>
+            <div class="empty-state">
+              <i class="pi pi-receipt" />
+              <div class="empty-state-title">No expense rows</div>
+              <div>Use <b>Add Expense</b> in the toolbar to record one. Toggle <b>Has details</b> to attach line items.</div>
+            </div>
+          </template>
+          <Column header="Name">
+            <template #body="{ data }">
+              <InputText v-model="data.name" size="small" fluid />
+            </template>
+          </Column>
+          <Column header="Paid by" style="width: 12rem">
+            <template #body="{ data }">
+              <Select v-model="data.paid" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
+            </template>
+          </Column>
+          <Column header="Amount" style="width: 12rem">
+            <template #body="{ data }">
+              <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" :disabled="data.hasDetails" size="small" fluid />
+            </template>
+          </Column>
+          <Column header="Details" style="width: 14rem">
+            <template #body="{ data }">
+              <div class="flex items-center gap-2">
+                <ToggleSwitch :model-value="data.hasDetails" @update:model-value="toggleHasDetails(data, $event)" />
+                <Button
+                  v-if="data.hasDetails"
+                  icon="pi pi-list"
+                  severity="secondary"
+                  size="small"
+                  :label="`${(data.details || []).length}`"
+                  @click="openDetails(data)"
+                />
+              </div>
+            </template>
+          </Column>
+          <Column header="" style="width: 4rem">
+            <template #body="{ data }">
+              <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete expense" @click="confirmDeleteExpense(data)" />
+            </template>
+          </Column>
+        </DataTable>
+      </template>
+    </Card>
   </template>
 
   <DetailsDialog
@@ -675,27 +677,30 @@ function fmt(value: number | null | undefined): string {
 .summary-grid {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
 }
+/* Mirrors a small striped DataTable, using its theme tokens */
 .summary-grid th,
 .summary-grid td {
-  padding: 0.375rem 0.5rem;
+  padding: var(--p-datatable-body-cell-sm-padding);
   text-align: right;
-  border-bottom: 1px solid var(--p-datatable-border-color);
+  border-bottom: 1px solid var(--p-datatable-body-cell-border-color);
+}
+.summary-grid tbody tr:nth-child(even) {
+  background: var(--p-datatable-row-striped-background);
 }
 .summary-grid thead th {
   background: var(--p-datatable-header-cell-background);
   color: var(--p-datatable-header-cell-color);
-  border-bottom: 1px solid var(--p-datatable-header-cell-border-color);
+  border-bottom-color: var(--p-datatable-header-cell-border-color);
   text-align: left;
-  font-weight: 600;
+  font-weight: var(--p-datatable-column-title-font-weight);
 }
 .summary-grid thead th:not(:first-child) {
   text-align: right;
 }
 .summary-grid tbody th {
   text-align: left;
-  font-weight: 400;
+  font-weight: var(--p-typography-font-weight);
   color: var(--p-text-muted-color);
 }
 .bar-col {
@@ -707,14 +712,8 @@ function fmt(value: number | null | undefined): string {
   border-radius: 3px;
   overflow: hidden;
 }
-.settlement-badge {
-  display: inline-block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.25rem 0.625rem;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 6px;
+.stale-icon {
+  color: var(--p-orange-500);
+  cursor: default;
 }
-.amount-positive { color: #15803d; }
-.amount-negative { color: #b91c1c; }
 </style>

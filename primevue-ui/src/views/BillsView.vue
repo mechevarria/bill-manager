@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Card from 'primevue/card'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Tooltip from 'primevue/tooltip'
@@ -17,6 +18,7 @@ import { listBills, deleteBill, createBill } from '@/services/billService'
 import type { Bill, BillSortField, SortOrder } from '@/types/api'
 import { useNotify } from '@/composables/useNotify'
 import { useDefaultsStore } from '@/stores/defaults'
+import { ownerColor } from '@/utils/ownerColors'
 
 const router = useRouter()
 const notify = useNotify()
@@ -176,112 +178,112 @@ async function confirmAddBill() {
 </script>
 
 <template>
-  <div class="card">
-    <Toolbar class="mb-4">
-      <template #start>
-        <div class="font-semibold text-xl">Bills</div>
-      </template>
-      <template #end>
-        <Button label="New" icon="pi pi-plus" size="small" @click="addBill" />
-      </template>
-    </Toolbar>
-
-    <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
-
-    <DataTable
-      v-if="loading && rows.length === 0 && !error"
-      :value="skeletonRows"
-      size="small"
-    >
-      <Column header="Month"><template #body><Skeleton /></template></Column>
-      <Column header="Year"><template #body><Skeleton /></template></Column>
-      <Column header="Income"><template #body><Skeleton /></template></Column>
-      <Column header="Expense"><template #body><Skeleton /></template></Column>
-      <Column header="Ratio" style="min-width: 8rem"><template #body><Skeleton /></template></Column>
-      <Column header="Actions" style="min-width: 12rem">
-        <template #body>
-          <Skeleton shape="circle" size="2.5rem" />
+  <Card class="mb-4">
+    <template #title>Bills</template>
+    <template #content>
+      <Toolbar class="mb-4">
+        <template #end>
+          <Button label="New" icon="pi pi-plus" size="small" @click="addBill" />
         </template>
-      </Column>
-    </DataTable>
+      </Toolbar>
 
-    <DataTable
-      v-else-if="!error"
-      :value="rows"
-      data-key="id"
-      size="small"
-      lazy
-      row-hover
-      :paginator="true"
-      :first="first"
-      :rows="pageSize"
-      :rows-per-page-options="[5, 10, 25]"
-      :total-records="totalRecords"
-      :loading="loading"
-      paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
-      removable-sort
-      :sort-field="sortField"
-      :sort-order="sortOrder === 'desc' ? -1 : 1"
-      style="cursor: pointer"
-      @page="onPage"
-      @sort="onSort"
-      @row-click="editBill($event.data)"
-    >
-      <template #paginatorstart>
-        <span class="text-muted-color text-sm">{{ totalRecords }} total</span>
-      </template>
-      <template #paginatorend>
-        <span class="text-sm" style="visibility: hidden">{{ totalRecords }} total</span>
-      </template>
-      <template #empty>
-        <div class="empty-state">
-          <i class="pi pi-folder-open" />
-          <div class="empty-state-title">No bills yet</div>
-          <div>Click <b>New</b> to create the first one.</div>
-        </div>
-      </template>
-      <Column field="month" header="Month" sortable style="min-width: 10rem" />
-      <Column field="year" header="Year" sortable style="min-width: 8rem" />
-      <Column field="totalIncome" header="Income" sortable style="min-width: 10rem">
-        <template #body="{ data }">
-          <span :class="amountClass(data.totalIncome)">{{ formatCurrency(data.totalIncome) }}</span>
+      <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
+
+      <DataTable
+        v-if="loading && rows.length === 0 && !error"
+        :value="skeletonRows"
+        size="small" striped-rows
+      >
+        <Column header="Month"><template #body><Skeleton /></template></Column>
+        <Column header="Year"><template #body><Skeleton /></template></Column>
+        <Column header="Income"><template #body><Skeleton /></template></Column>
+        <Column header="Expense"><template #body><Skeleton /></template></Column>
+        <Column header="Ratio" style="min-width: 8rem"><template #body><Skeleton /></template></Column>
+        <Column header="Actions" style="min-width: 12rem">
+          <template #body>
+            <Skeleton shape="circle" size="2.5rem" />
+          </template>
+        </Column>
+      </DataTable>
+
+      <DataTable
+        v-else-if="!error"
+        :value="rows"
+        data-key="id"
+        size="small" striped-rows
+        lazy
+        row-hover
+        :paginator="true"
+        :first="first"
+        :rows="pageSize"
+        :rows-per-page-options="[5, 10, 25]"
+        :total-records="totalRecords"
+        :loading="loading"
+        paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+        removable-sort
+        :sort-field="sortField"
+        :sort-order="sortOrder === 'desc' ? -1 : 1"
+        style="cursor: pointer"
+        @page="onPage"
+        @sort="onSort"
+        @row-click="editBill($event.data)"
+      >
+        <template #paginatorstart>
+          <span class="text-muted-color text-sm">{{ totalRecords }} total</span>
         </template>
-      </Column>
-      <Column field="totalExpense" header="Expense" sortable style="min-width: 10rem">
-        <template #body="{ data }">
-          <span :class="data.totalExpense > 0 ? 'amount-negative' : 'amount-neutral'">
-            {{ formatCurrency(data.totalExpense) }}
-          </span>
+        <template #paginatorend>
+          <span class="text-sm" style="visibility: hidden">{{ totalRecords }} total</span>
         </template>
-      </Column>
-      <Column header="Ratio" style="min-width: 8rem">
-        <template #body="{ data }">
-          <div
-            v-tooltip.top="`Income: ${(incomeRatio(data) * 100).toFixed(0)}% / Expense: ${((1 - incomeRatio(data)) * 100).toFixed(0)}%`"
-            style="display: flex; align-items: center; height: 100%"
-          >
-            <div class="ratio-bar" style="flex: 1">
-              <div :style="{ width: (incomeRatio(data) * 100) + '%', background: '#22c55ecc' }" />
-              <div :style="{ width: ((1 - incomeRatio(data)) * 100) + '%', background: '#ef4444cc' }" />
-            </div>
+        <template #empty>
+          <div class="empty-state">
+            <i class="pi pi-folder-open" />
+            <div class="empty-state-title">No bills yet</div>
+            <div>Click <b>New</b> to create the first one.</div>
           </div>
         </template>
-      </Column>
-      <Column header="" style="width: 4rem">
-        <template #body="{ data }">
-          <Button
-            icon="pi pi-trash"
-            size="small"
-            outlined
-            rounded
-            severity="danger"
-            aria-label="Delete"
-            @click.stop="confirmDelete(data)"
-          />
-        </template>
-      </Column>
-    </DataTable>
-  </div>
+        <Column field="month" header="Month" sortable style="min-width: 10rem" />
+        <Column field="year" header="Year" sortable style="min-width: 8rem" />
+        <Column field="totalIncome" header="Income" sortable style="min-width: 10rem">
+          <template #body="{ data }">
+            <span :class="amountClass(data.totalIncome)">{{ formatCurrency(data.totalIncome) }}</span>
+          </template>
+        </Column>
+        <Column field="totalExpense" header="Expense" sortable style="min-width: 10rem">
+          <template #body="{ data }">
+            <span :class="data.totalExpense > 0 ? 'amount-negative' : 'amount-neutral'">
+              {{ formatCurrency(data.totalExpense) }}
+            </span>
+          </template>
+        </Column>
+        <Column header="Ratio" style="min-width: 8rem">
+          <template #body="{ data }">
+            <div
+              v-tooltip.top="`Income: ${(incomeRatio(data) * 100).toFixed(0)}% / Expense: ${((1 - incomeRatio(data)) * 100).toFixed(0)}%`"
+              style="display: flex; align-items: center; height: 100%"
+            >
+              <div class="ratio-bar" style="flex: 1">
+                <div :style="{ width: (incomeRatio(data) * 100) + '%', background: ownerColor('success') }" />
+                <div :style="{ width: ((1 - incomeRatio(data)) * 100) + '%', background: ownerColor('danger') }" />
+              </div>
+            </div>
+          </template>
+        </Column>
+        <Column header="" style="width: 4rem">
+          <template #body="{ data }">
+            <Button
+              icon="pi pi-trash"
+              size="small"
+              outlined
+              rounded
+              severity="danger"
+              aria-label="Delete"
+              @click.stop="confirmDelete(data)"
+            />
+          </template>
+        </Column>
+      </DataTable>
+    </template>
+  </Card>
 
   <Dialog
     v-model:visible="newBillDialogVisible"

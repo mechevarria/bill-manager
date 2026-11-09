@@ -13,6 +13,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { parseDetailCsv } from '@/services/detailParserService'
 import { useNotify } from '@/composables/useNotify'
 import type { Detail, Owner } from '@/types/api'
+import { ownerRowStyle } from '@/utils/ownerColors'
 
 interface Props {
   visible: boolean
@@ -84,20 +85,9 @@ function clearAll() {
   })
 }
 
-const colorSwatches: Record<string, string> = {
-  active: '#64748b',
-  success: '#22c55e',
-  info: '#0ea5e9',
-  warning: '#f97316',
-  danger: '#ef4444',
-}
-
 function detailRowStyle(detail: Detail): Record<string, string> {
   if (!detail.personal) return {}
-  const owner = props.owners.find((o) => o.name === detail.personal)
-  if (!owner?.color) return {}
-  const hex = colorSwatches[owner.color] ?? '#6b7280'
-  return { backgroundColor: hex + '1a' }
+  return ownerRowStyle(props.owners.find((o) => o.name === detail.personal)?.color)
 }
 
 async function onCsvSelect(event: FileUploadSelectEvent) {

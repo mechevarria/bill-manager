@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Card from 'primevue/card'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Chart from 'primevue/chart'
 import Select from 'primevue/select'
@@ -48,8 +49,17 @@ const lineOptions = ref<ChartOptions | null>(null)
 const barData = ref<ChartData | null>(null)
 const barOptions = ref<ChartOptions | null>(null)
 
+// Resolve a theme token to a concrete color. Theme tokens can contain
+// light-dark() / color-mix(), which Chart.js can't parse, so let the browser
+// compute them on a probe element and read back the final color.
 function token(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  const probe = document.createElement('span')
+  probe.style.color = `var(${name})`
+  probe.style.display = 'none'
+  document.body.appendChild(probe)
+  const color = getComputedStyle(probe).color
+  probe.remove()
+  return color
 }
 
 function rebuildCharts() {
@@ -189,45 +199,51 @@ watch(
 </script>
 
 <template>
-  <div class="card">
-    <div class="font-semibold text-xl mb-4">Charts</div>
-    <Toolbar class="mb-4">
-      <template #start>
-        <Select
-          v-model="selectedYear"
-          :options="yearOptions"
-          option-label="label"
-          option-value="value"
-          size="small"
-          style="min-width: 8rem"
-        />
-      </template>
-    </Toolbar>
+  <Card class="mb-4">
+    <template #title>Charts</template>
+    <template #content>
+      <Toolbar class="mb-4">
+        <template #start>
+          <Select
+            v-model="selectedYear"
+            :options="yearOptions"
+            option-label="label"
+            option-value="value"
+            size="small"
+            style="min-width: 8rem"
+          />
+        </template>
+      </Toolbar>
 
-    <Skeleton v-if="loading" height="22rem" />
-    <Message v-else-if="error" severity="error" :closable="false">{{ error }}</Message>
-    <div v-else-if="filteredBills.length === 0" class="empty-state">
-      <i class="pi pi-chart-bar" />
-      <div class="empty-state-title">No data to chart</div>
-      <div v-if="bills.length === 0">Add a bill on the Bills page to populate this chart.</div>
-      <div v-else>No bills match the selected year. Switch to <b>All</b> or pick a different year.</div>
-    </div>
-  </div>
+      <Skeleton v-if="loading" height="22rem" />
+      <Message v-else-if="error" severity="error" :closable="false">{{ error }}</Message>
+      <div v-else-if="filteredBills.length === 0" class="empty-state">
+        <i class="pi pi-chart-bar" />
+        <div class="empty-state-title">No data to chart</div>
+        <div v-if="bills.length === 0">Add a bill on the Bills page to populate this chart.</div>
+        <div v-else>No bills match the selected year. Switch to <b>All</b> or pick a different year.</div>
+      </div>
+    </template>
+  </Card>
 
   <div v-if="!loading && !error && filteredBills.length > 0" class="chart-row">
-    <div v-if="lineData" class="card">
-      <div class="font-semibold text-xl mb-4">Income vs Expense</div>
-      <div style="height: 22rem">
-        <Chart type="line" :data="lineData" :options="lineOptions ?? undefined" />
-      </div>
-    </div>
+    <Card v-if="lineData" class="mb-4">
+      <template #title>Income vs Expense</template>
+      <template #content>
+        <div style="height: 22rem">
+          <Chart type="line" :data="lineData" :options="lineOptions ?? undefined" />
+        </div>
+      </template>
+    </Card>
 
-    <div v-if="barData" class="card">
-      <div class="font-semibold text-xl mb-4">Total Income vs Total Expense</div>
-      <div style="height: 22rem">
-        <Chart type="bar" :data="barData" :options="barOptions ?? undefined" />
-      </div>
-    </div>
+    <Card v-if="barData" class="mb-4">
+      <template #title>Total Income vs Total Expense</template>
+      <template #content>
+        <div style="height: 22rem">
+          <Chart type="bar" :data="barData" :options="barOptions ?? undefined" />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 

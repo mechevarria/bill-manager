@@ -1,119 +1,77 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { RouterLink, RouterView } from 'vue-router'
+import Button from 'primevue/button'
+import Drawer from 'primevue/drawer'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
+import AppMenu from '@/components/AppMenu.vue'
 import { useDarkMode } from '@/composables/useDarkMode'
 
 const { isDark, toggle: toggleDark } = useDarkMode()
-const route = useRoute()
 
-const staticInactive = ref(false)
-const mobileActive = ref(false)
-
-interface NavItem {
-  to: string
-  label: string
-  icon: string
-}
-
-const navItems: NavItem[] = [
-  { to: '/', label: 'Bills', icon: 'pi pi-list' },
-  { to: '/chart', label: 'Chart', icon: 'pi pi-chart-line' },
-  { to: '/search', label: 'Search', icon: 'pi pi-search' },
-  { to: '/defaults', label: 'Defaults', icon: 'pi pi-cog' },
-  { to: '/data', label: 'Data', icon: 'pi pi-database' },
-]
-
-const containerClass = computed(() => ({
-  'layout-static-inactive': staticInactive.value,
-  'layout-mobile-active': mobileActive.value,
-}))
-
-function toggleMenu() {
-  if (window.innerWidth < 992) {
-    mobileActive.value = !mobileActive.value
-  } else {
-    staticInactive.value = !staticInactive.value
-  }
-}
-
-function onMenuItemClick() {
-  if (mobileActive.value) mobileActive.value = false
-}
-
-function isItemActive(to: string): boolean {
-  // Bills lives at "/" and also owns /bills/:id detail routes
-  if (to === '/') {
-    return route.path === '/' || route.path.startsWith('/bills/')
-  }
-  return route.path === to || route.path.startsWith(to + '/')
-}
+const collapsed = ref(false)
+const mobileMenuOpen = ref(false)
 </script>
 
 <template>
-  <div class="layout-wrapper" :class="containerClass">
-    <!-- Full-width topbar -->
-    <div class="layout-topbar">
-      <div class="layout-topbar-logo-container">
-        <button
-          type="button"
-          class="layout-topbar-action layout-menu-button"
-          aria-label="Toggle navigation"
-          @click="toggleMenu"
-        >
-          <i class="pi pi-bars" />
-        </button>
-        <RouterLink to="/" class="layout-topbar-logo">
-          <img src="@/assets/ui-logo.svg" alt="Expense Divider" class="brand-logo" />
-          <span>Expense Divider</span>
+  <div class="layout-wrapper" :class="{ 'layout-collapsed': collapsed }">
+    <!-- Desktop sidebar: brand + collapse caret, then navigation. Collapses to icons. -->
+    <aside class="layout-sidebar">
+      <div class="layout-sidebar-header">
+        <RouterLink to="/" class="layout-brand">
+          <img src="@/assets/ui-logo.svg" alt="" class="layout-brand-logo" />
+          <span class="layout-brand-title text-lg">Expense Divider</span>
         </RouterLink>
+        <Button
+          class="layout-collapse-button"
+          :icon="collapsed ? 'pi pi-angle-right' : 'pi pi-angle-left'"
+          :aria-label="collapsed ? 'Expand navigation' : 'Collapse navigation'"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          @click="collapsed = !collapsed"
+        />
       </div>
+      <AppMenu />
+    </aside>
 
-      <div class="layout-topbar-actions">
-        <button
-          type="button"
-          class="layout-topbar-action"
-          :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-          @click="toggleDark"
-        >
-          <i :class="['pi', isDark ? 'pi-sun' : 'pi-moon']" />
-        </button>
-      </div>
-    </div>
-
-    <!-- Floating sidebar card -->
-    <div class="layout-sidebar">
-      <nav class="layout-menu">
-        <RouterLink
-          v-for="item in navItems"
-          :key="item.to"
-          v-slot="{ href, navigate }"
-          :to="item.to"
-          custom
-        >
-          <a
-            :href="href"
-            class="layout-menuitem"
-            :class="{ 'is-active': isItemActive(item.to) }"
-            @click="(e) => { navigate(e); onMenuItemClick() }"
-          >
-            <i :class="item.icon" />
-            <span class="layout-menuitem-label">{{ item.label }}</span>
-          </a>
+    <!-- Mobile navigation -->
+    <Drawer v-model:visible="mobileMenuOpen" class="layout-drawer">
+      <template #header>
+        <RouterLink to="/" class="layout-brand" @click="mobileMenuOpen = false">
+          <img src="@/assets/ui-logo.svg" alt="" class="layout-brand-logo" />
+          <span class="layout-brand-title text-lg">Expense Divider</span>
         </RouterLink>
-      </nav>
-    </div>
+      </template>
+      <AppMenu @navigate="mobileMenuOpen = false" />
+    </Drawer>
 
-    <!-- Main content -->
-    <div class="layout-main-container">
-      <div class="layout-main">
-        <RouterView />
-      </div>
-    </div>
+    <header class="layout-topbar">
+      <Button
+        class="layout-mobile-menu-button"
+        icon="pi pi-bars"
+        aria-label="Open navigation"
+        severity="secondary"
+        text
+        rounded
+        @click="mobileMenuOpen = true"
+      />
+      <Button
+        class="layout-topbar-end"
+        :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+        :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        severity="secondary"
+        text
+        rounded
+        @click="toggleDark"
+      />
+    </header>
 
-    <!-- Click-outside mask for mobile -->
-    <div class="layout-mask" @click="mobileActive = false" />
+    <main class="layout-main">
+      <RouterView />
+    </main>
 
     <Toast position="top-right" />
     <ConfirmDialog :draggable="false" style="width: 22rem" />
@@ -121,181 +79,136 @@ function isItemActive(to: string): boolean {
 </template>
 
 <style scoped>
+/* Layout dimensions — defined once; offsets below derive from these.
+   Colors come from Lara tokens only. */
 .layout-wrapper {
-  min-height: 100vh;
+  --layout-topbar-height: 4rem;
+  --layout-sidebar-width: 16rem;
+  --layout-sidebar-collapsed-width: 4rem;
+  --layout-content-padding: 2rem;
+  --layout-transition: var(--p-transition-duration) ease;
+  --layout-sidebar-current: var(--layout-sidebar-width);
 }
 
-/* ---------- Topbar (full width, fixed) ---------- */
+/* ---------- Sidebar ---------- */
+.layout-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--layout-sidebar-current);
+  display: flex;
+  flex-direction: column;
+  background: var(--p-content-background);
+  border-right: 1px solid var(--p-content-border-color);
+  overflow: hidden auto;
+  z-index: 1001;
+  transition: width var(--layout-transition);
+}
+
+.layout-sidebar-header {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  height: var(--layout-topbar-height);
+  padding: 0 0.5rem 0 1rem;
+  border-bottom: 1px solid var(--p-content-border-color);
+}
+
+.layout-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  color: var(--p-text-color);
+  font-weight: var(--p-card-title-font-weight);
+  text-decoration: none;
+}
+.layout-brand-logo {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+}
+.layout-brand-title {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.layout-collapse-button {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ---------- Topbar ---------- */
 .layout-topbar {
   position: fixed;
   top: 0;
-  left: 0;
   right: 0;
-  height: 4rem;
-  background: var(--p-content-background, #ffffff);
+  left: var(--layout-sidebar-current);
+  height: var(--layout-topbar-height);
   display: flex;
   align-items: center;
-  padding: 0 1.25rem;
+  padding: 0 var(--layout-content-padding);
+  background: var(--p-content-background);
+  border-bottom: 1px solid var(--p-content-border-color);
   z-index: 1000;
-  box-shadow:
-    0 1px 2px 0 rgb(0 0 0 / 0.03),
-    0 1px 6px -1px rgb(0 0 0 / 0.02),
-    0 2px 4px 0 rgb(0 0 0 / 0.02);
+  transition: left var(--layout-transition);
 }
-
-.layout-topbar-logo-container {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.layout-topbar-action {
-  background: transparent;
-  border: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--p-text-color, #374151);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.15s ease;
-}
-.layout-topbar-action:hover {
-  background: color-mix(in srgb, var(--p-text-color, #374151) 8%, transparent);
-}
-.layout-topbar-action .pi {
-  font-size: 1.1rem;
-}
-
-.layout-topbar-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: var(--p-text-color, #1f2937);
-  font-weight: 600;
-  font-size: 1.05rem;
-  padding: 0 0.5rem;
-}
-.layout-topbar-logo .brand-logo {
-  width: 1.75rem;
-  height: 1.75rem;
-  display: block;
-}
-
-.layout-topbar-actions {
+.layout-topbar-end {
   margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
 }
-
-/* ---------- Sidebar (floating card) ---------- */
-.layout-sidebar {
-  position: fixed;
-  top: 5rem;
-  left: 1rem;
-  width: 16rem;
-  bottom: 1rem;
-  background: var(--p-content-background, #ffffff);
-  border-radius: 12px;
-  padding: 0.875rem 0.625rem;
-  overflow-y: auto;
-  z-index: 999;
-  transition:
-    transform 0.25s ease,
-    left 0.25s ease;
-  box-shadow:
-    0 1px 2px 0 rgb(0 0 0 / 0.03),
-    0 1px 6px -1px rgb(0 0 0 / 0.02),
-    0 4px 8px -2px rgb(0 0 0 / 0.04);
-}
-
-.layout-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.layout-menuitem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 0.75rem;
-  border-radius: 6px;
-  color: var(--p-text-color, #374151);
-  text-decoration: none;
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.25rem;
-  transition:
-    background-color 0.12s ease,
-    color 0.12s ease;
-}
-.layout-menuitem i {
-  font-size: 0.95rem;
-  width: 1.25rem;
-  text-align: center;
-  color: var(--p-text-muted-color, #6b7280);
-  transition: color 0.12s ease;
-}
-.layout-menuitem:hover {
-  background: color-mix(in srgb, var(--p-text-color, #374151) 6%, transparent);
-}
-.layout-menuitem.is-active {
-  background: color-mix(in srgb, var(--p-primary-color, #06b6d4) 10%, transparent);
-  color: var(--p-primary-color, #06b6d4);
-  font-weight: 600;
-}
-.layout-menuitem.is-active i {
-  color: var(--p-primary-color, #06b6d4);
-}
-
-/* ---------- Main container (offset by sidebar + topbar) ---------- */
-.layout-main-container {
-  padding: 5rem 1.5rem 1.5rem 18rem;
-  min-height: 100vh;
-  transition: padding-left 0.25s ease;
-}
-
-.layout-main {
-  display: flex;
-  flex-direction: column;
-}
-
-/* ---------- Collapsed (desktop) ---------- */
-.layout-static-inactive .layout-sidebar {
-  transform: translateX(calc(-100% - 1.5rem));
-}
-.layout-static-inactive .layout-main-container {
-  padding-left: 1.5rem;
-}
-
-/* ---------- Mask (mobile overlay) ---------- */
-.layout-mask {
+.layout-mobile-menu-button {
   display: none;
 }
 
-/* ---------- Mobile breakpoint ---------- */
+/* ---------- Content ---------- */
+.layout-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: calc(var(--layout-topbar-height) + var(--layout-content-padding)) var(--layout-content-padding)
+    var(--layout-content-padding) calc(var(--layout-sidebar-current) + var(--layout-content-padding));
+  transition: padding-left var(--layout-transition);
+}
+
+/* ---------- Desktop: collapsed to icons; hover to peek ---------- */
+@media (min-width: 992px) {
+  .layout-collapsed {
+    --layout-sidebar-current: var(--layout-sidebar-collapsed-width);
+  }
+  .layout-collapsed .layout-sidebar:hover {
+    width: var(--layout-sidebar-width);
+    box-shadow: var(--p-overlay-navigation-shadow);
+  }
+  .layout-collapsed .layout-sidebar:not(:hover) .layout-sidebar-header {
+    justify-content: center;
+    padding: 0;
+  }
+  .layout-collapsed .layout-sidebar:not(:hover) .layout-brand-title,
+  .layout-collapsed .layout-sidebar:not(:hover) .layout-collapse-button {
+    display: none;
+  }
+  /* Labels keep their line height (rows don't shrink) but take no width */
+  .layout-collapsed .layout-sidebar:not(:hover) :deep(.p-menu-item-link) {
+    justify-content: center;
+    gap: 0;
+  }
+  .layout-collapsed .layout-sidebar:not(:hover) :deep(.p-menu-item-label) {
+    width: 0;
+    overflow: hidden;
+  }
+}
+
+/* ---------- Mobile: sidebar replaced by the Drawer ---------- */
 @media (max-width: 991.98px) {
+  .layout-wrapper {
+    --layout-sidebar-current: 0px;
+    --layout-content-padding: 1rem;
+  }
   .layout-sidebar {
-    transform: translateX(calc(-100% - 1.5rem));
+    display: none;
   }
-  .layout-main-container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-  .layout-mobile-active .layout-sidebar {
-    transform: translateX(0);
-  }
-  .layout-mobile-active .layout-mask {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgb(0 0 0 / 0.4);
-    z-index: 998;
+  .layout-mobile-menu-button {
+    display: inline-flex;
   }
 }
 </style>

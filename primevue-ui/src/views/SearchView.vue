@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Card from 'primevue/card'
 import { computed, ref } from 'vue'
 import Button from 'primevue/button'
 import Toolbar from 'primevue/toolbar'
@@ -139,166 +140,174 @@ function amountClass(value: number | null | undefined, category: string): string
 </script>
 
 <template>
-  <div class="card">
-    <div class="font-semibold text-xl mb-4">Search</div>
+  <Card class="mb-4">
+    <template #title>Search</template>
+    <template #content>
 
-    <form class="mb-4" @submit.prevent="submitText">
-      <Toolbar>
-        <template #start>
-          <div class="flex items-center gap-2">
-            <Select
-              v-model="operator"
-              :options="operatorOptions"
-              option-label="label"
-              option-value="value"
+      <form class="mb-4" @submit.prevent="submitText">
+        <Toolbar>
+          <template #start>
+            <div class="flex items-center gap-2">
+              <Select
+                v-model="operator"
+                :options="operatorOptions"
+                option-label="label"
+                option-value="value"
+                size="small"
+                style="min-width: 12rem"
+              />
+              <InputText
+                v-model="queryInput"
+                placeholder="Search terms…"
+                size="small"
+                style="min-width: 16rem"
+              />
+            </div>
+          </template>
+          <template #end>
+            <Button
+              type="submit"
+              label="Search"
+              icon="pi pi-search"
               size="small"
-              style="min-width: 12rem"
+              :loading="loading"
+              :disabled="queryInput.trim().length < 2"
             />
-            <InputText
-              v-model="queryInput"
-              placeholder="Search terms…"
-              size="small"
-              style="min-width: 16rem"
-            />
-          </div>
-        </template>
-        <template #end>
-          <Button
-            type="submit"
-            label="Search"
-            icon="pi pi-search"
-            size="small"
-            :loading="loading"
-            :disabled="queryInput.trim().length < 2"
-          />
-        </template>
-      </Toolbar>
-    </form>
+          </template>
+        </Toolbar>
+      </form>
 
-    <div v-if="params.length > 0" class="flex items-center gap-2 mb-2" style="flex-wrap: wrap">
-      <span class="text-muted-color text-sm">Filters:</span>
-      <Chip
-        v-for="(p, i) in params"
-        :key="i"
-        :label="p.label"
-        removable
-        @remove="removeParam(i)"
-      />
-      <Button label="Clear all" severity="secondary" text size="small" @click="clearAll" />
-    </div>
+      <div v-if="params.length > 0" class="flex items-center gap-2 mb-2" style="flex-wrap: wrap">
+        <span class="text-muted-color text-sm">Filters:</span>
+        <Chip
+          v-for="(p, i) in params"
+          :key="i"
+          :label="p.label"
+          removable
+          @remove="removeParam(i)"
+        />
+        <Button label="Clear all" severity="secondary" text size="small" @click="clearAll" />
+      </div>
 
-    <div v-else-if="!result && !loading" class="empty-state">
-      <i class="pi pi-search" />
-      <div class="empty-state-title">Search bills, expenses, and credit-card details</div>
-      <div>Type a description and press <b>Search</b>, or drill in from a filter after your first query.</div>
-    </div>
-  </div>
+      <div v-else-if="!result && !loading" class="empty-state">
+        <i class="pi pi-search" />
+        <div class="empty-state-title">Search bills, expenses, and credit-card details</div>
+        <div>Type a description and press <b>Search</b>, or drill in from a filter after your first query.</div>
+      </div>
+    </template>
+  </Card>
 
   <div v-if="result" class="search-layout">
     <!-- Sidebar filters -->
-    <div class="card">
-      <div class="font-semibold text-base mb-4">Filter</div>
-      <Accordion :value="['cat']" multiple>
-        <AccordionPanel value="cat">
-          <AccordionHeader>Category</AccordionHeader>
-          <AccordionContent>
-            <ul class="filter-list">
-              <li v-for="f in filterCategories" :key="f.label">
-                <button class="filter-link" @click="drilldownCategory(f.label)">
-                  <span>{{ f.label }}</span>
-                  <span class="filter-count">{{ f.count }}</span>
-                </button>
-              </li>
-              <li v-if="filterCategories.length === 0" class="filter-empty">No categories</li>
-            </ul>
-          </AccordionContent>
-        </AccordionPanel>
-        <AccordionPanel value="year">
-          <AccordionHeader>Year</AccordionHeader>
-          <AccordionContent>
-            <ul class="filter-list">
-              <li v-for="f in filterYears" :key="f.label">
-                <button class="filter-link" @click="drilldownYear(f.label)">
-                  <span>{{ yearFor(f.label) }}</span>
-                  <span class="filter-count">{{ f.count }}</span>
-                </button>
-              </li>
-              <li v-if="filterYears.length === 0" class="filter-empty">No years</li>
-            </ul>
-          </AccordionContent>
-        </AccordionPanel>
-        <AccordionPanel value="price">
-          <AccordionHeader>Amount</AccordionHeader>
-          <AccordionContent>
-            <ul class="filter-list">
-              <li v-for="f in filterPrices" :key="f.label">
-                <button class="filter-link" @click="drilldownPrice(f.label)">
-                  <span>{{ priceLabel(f.label) }}</span>
-                  <span class="filter-count">{{ f.count }}</span>
-                </button>
-              </li>
-              <li v-if="filterPrices.length === 0" class="filter-empty">No buckets</li>
-            </ul>
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
-    </div>
+    <Card class="mb-4">
+      <template #title>Filter</template>
+      <template #content>
+        <Accordion :value="['cat']" multiple>
+          <AccordionPanel value="cat">
+            <AccordionHeader>Category</AccordionHeader>
+            <AccordionContent>
+              <ul class="filter-list">
+                <li v-for="f in filterCategories" :key="f.label">
+                  <button class="filter-link" @click="drilldownCategory(f.label)">
+                    <span>{{ f.label }}</span>
+                    <span class="filter-count">{{ f.count }}</span>
+                  </button>
+                </li>
+                <li v-if="filterCategories.length === 0" class="filter-empty">No categories</li>
+              </ul>
+            </AccordionContent>
+          </AccordionPanel>
+          <AccordionPanel value="year">
+            <AccordionHeader>Year</AccordionHeader>
+            <AccordionContent>
+              <ul class="filter-list">
+                <li v-for="f in filterYears" :key="f.label">
+                  <button class="filter-link" @click="drilldownYear(f.label)">
+                    <span>{{ yearFor(f.label) }}</span>
+                    <span class="filter-count">{{ f.count }}</span>
+                  </button>
+                </li>
+                <li v-if="filterYears.length === 0" class="filter-empty">No years</li>
+              </ul>
+            </AccordionContent>
+          </AccordionPanel>
+          <AccordionPanel value="price">
+            <AccordionHeader>Amount</AccordionHeader>
+            <AccordionContent>
+              <ul class="filter-list">
+                <li v-for="f in filterPrices" :key="f.label">
+                  <button class="filter-link" @click="drilldownPrice(f.label)">
+                    <span>{{ priceLabel(f.label) }}</span>
+                    <span class="filter-count">{{ f.count }}</span>
+                  </button>
+                </li>
+                <li v-if="filterPrices.length === 0" class="filter-empty">No buckets</li>
+              </ul>
+            </AccordionContent>
+          </AccordionPanel>
+        </Accordion>
+      </template>
+    </Card>
 
     <!-- Results -->
-    <div class="card">
-      <div class="flex items-center gap-4 mb-4">
-        <div>
-          <div class="font-semibold text-xl">{{ result.totalCount }} result(s)</div>
-          <div class="text-muted-color text-sm">
-            Total: {{ fmtCurrency(result.totalAmount) }}
-          </div>
+    <Card class="mb-4">
+      <template #title>
+        <div class="flex items-center gap-4">
+          {{ result.totalCount }} result(s)
+          <ProgressSpinner v-if="loading" style="width: 1.5rem; height: 1.5rem; margin-left: auto" />
         </div>
-        <ProgressSpinner v-if="loading" style="width: 1.5rem; height: 1.5rem; margin-left: auto" />
-      </div>
+      </template>
+      <template #subtitle>Total: {{ fmtCurrency(result.totalAmount) }}</template>
+      <template #content>
 
-      <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
+        <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
 
-      <DataTable
-        :value="result.results"
-        paginator
-        :rows="25"
-        :rows-per-page-options="[25, 50, 100]"
-        striped-rows
-        sortable
-        size="small"
-      >
-        <template #empty>
-          <div class="empty-state">
-            <i class="pi pi-search" />
-            <div class="empty-state-title">No results</div>
-            <div>Try a broader search term or remove some filters.</div>
-          </div>
-        </template>
-        <Column field="category" header="Category" sortable />
-        <Column field="date" header="Date" sortable>
-          <template #body="{ data }">{{ fmtDate(data.date) }}</template>
-        </Column>
-        <Column field="description" header="Description" sortable />
-        <Column field="amount" header="Amount" sortable style="width: 9rem">
-          <template #body="{ data }">
-            <span :class="amountClass(data.amount, data.category)">{{ fmtCurrency(data.amount) }}</span>
+        <DataTable
+          :value="result.results"
+          paginator
+          :rows="25"
+          :rows-per-page-options="[25, 50, 100]"
+          striped-rows
+          sortable
+          size="small"
+        >
+          <template #empty>
+            <div class="empty-state">
+              <i class="pi pi-search" />
+              <div class="empty-state-title">No results</div>
+              <div>Try a broader search term or remove some filters.</div>
+            </div>
           </template>
-        </Column>
-        <Column field="owner" header="Owner" sortable style="width: 9rem" />
-      </DataTable>
-    </div>
+          <Column field="category" header="Category" sortable />
+          <Column field="date" header="Date" sortable>
+            <template #body="{ data }">{{ fmtDate(data.date) }}</template>
+          </Column>
+          <Column field="description" header="Description" sortable />
+          <Column field="amount" header="Amount" sortable style="width: 9rem">
+            <template #body="{ data }">
+              <span :class="amountClass(data.amount, data.category)">{{ fmtCurrency(data.amount) }}</span>
+            </template>
+          </Column>
+          <Column field="owner" header="Owner" sortable style="width: 9rem" />
+        </DataTable>
+      </template>
+    </Card>
   </div>
 
-  <div v-else-if="loading" class="card">
-    <Skeleton width="40%" height="1.25rem" class="mb-4" />
-    <Skeleton height="2rem" class="mb-2" />
-    <Skeleton height="2rem" class="mb-2" />
-    <Skeleton height="2rem" class="mb-2" />
-    <Skeleton height="2rem" />
-  </div>
-  <div v-else-if="error" class="card">
-    <Message severity="error" :closable="false">{{ error }}</Message>
-  </div>
+  <Card v-else-if="loading" class="mb-4">
+    <template #content>
+      <Skeleton width="40%" height="1.25rem" class="mb-4" />
+      <Skeleton height="2rem" class="mb-2" />
+      <Skeleton height="2rem" class="mb-2" />
+      <Skeleton height="2rem" class="mb-2" />
+      <Skeleton height="2rem" />
+    </template>
+  </Card>
+  <Card v-else-if="error" class="mb-4">
+    <template #content>
+      <Message severity="error" :closable="false">{{ error }}</Message>
+    </template>
+  </Card>
 </template>
 
 <style scoped>
@@ -315,11 +324,11 @@ function amountClass(value: number | null | undefined, category: string): string
 }
 .filter-list {
   list-style: none;
-  padding: 0;
+  padding: var(--p-list-padding);
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: var(--p-list-gap);
 }
 .filter-link {
   width: 100%;
@@ -328,15 +337,17 @@ function amountClass(value: number | null | undefined, category: string): string
   justify-content: space-between;
   background: transparent;
   border: 0;
-  padding: 0.375rem 0.5rem;
-  border-radius: 4px;
+  padding: var(--p-list-option-padding);
+  border-radius: var(--p-list-option-border-radius);
   cursor: pointer;
-  color: var(--p-text-color);
-  font-size: 0.85rem;
+  color: var(--p-list-option-color);
+  font: inherit;
+  font-size: var(--p-list-option-font-size);
   text-align: left;
 }
 .filter-link:hover {
-  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
+  background: var(--p-list-option-focus-background);
+  color: var(--p-list-option-focus-color);
 }
 .filter-count {
   color: var(--p-text-muted-color);
@@ -344,7 +355,6 @@ function amountClass(value: number | null | undefined, category: string): string
 }
 .filter-empty {
   color: var(--p-text-muted-color);
-  font-size: 0.85rem;
-  padding: 0.5rem;
+  padding: var(--p-list-option-padding);
 }
 </style>
