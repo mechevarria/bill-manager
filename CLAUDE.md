@@ -42,7 +42,7 @@ Single project-wide semver, managed by release-please (`.github/workflows/releas
 - **No Tailwind** — utility classes are hand-rolled in `src/assets/main.css` to mirror Tailwind names
 
 ### PrimeVue Config (`src/main.ts`)
-- `definePreset(Lara, { semantic: { primary: palette('{cyan}') } })` — nothing else overridden; tables, toolbars, spacing are **Lara defaults** (don't re-theme DataTable headers etc.)
+- `definePreset(Lara, …)`: `primary: palette('{cyan}')` plus one override, `datatable.headerCell.background: '{content.background}'` (no tinted header row, like primevue.dev). Everything else (toolbars, spacing) is **Lara defaults**
 - **License**: PrimeVue 5 is commercial (free Community License). `license: import.meta.env.VITE_PRIMEUI_LICENSE` (typed in `env.d.ts`). Local: `primevue-ui/.env.local`; Docker: root `.env` `PRIMEUI_LICENSE` → compose build arg → `ARG VITE_PRIMEUI_LICENSE` in the UI Dockerfile. Missing key ⇒ "invalid license" banner. Never strip/patch the license check.
 - **No hardcoded colors anywhere** (no hex/rgb literals in `.vue`, `.ts`, `.css`). Use `--p-*` theme tokens (`--p-text-color`, `--p-content-background`, `--p-content-border-color`, `--p-highlight-*`, `--p-<palette>-<shade>`, …)
 - Owner colors: `src/utils/ownerColors.ts` maps severity names (`active`/`success`/`info`/`warning`/`danger`) to palettes (slate/green/sky/orange/red) and mirrors Lara's per-scheme rules via `light-dark()`:
@@ -52,11 +52,11 @@ Single project-wide semver, managed by release-please (`.github/workflows/releas
 - Chart.js can't parse `light-dark()` token values — `ChartView` resolves tokens to concrete colors via a probe element
 - Icons: PrimeIcons (`pi pi-*`) only
 - `darkModeSelector: '.app-dark'`
-- No global `inputSize` — per-component `size="small"` on all form elements
+- No `size` props — every component uses Lara's default size, matching primevue.dev
 
 ### Sizing Convention
-All form elements use `size="small"`: `InputText`, `InputNumber`, `Select`, `Button`, `DataTable`, `DatePicker`.
-Every `DataTable` also has `striped-rows` (no `show-gridlines`). Owner-tinted rows override the stripe by design. The hand-built `.summary-grid` tables in `BillEditView` mirror a small striped DataTable using `--p-datatable-*` tokens.
+Never set `size="small"` (or `size: 'small'` in `*-button-props`) — components use Lara's default sizing, like the primevue.dev showcase.
+Every `DataTable` also has `striped-rows` (no `show-gridlines`). Owner-tinted rows override the stripe by design. The hand-built `.summary-grid` tables in `BillEditView` mirror a default striped DataTable using `--p-datatable-*` tokens.
 
 ### App Shell (`App.vue`)
 - Full-height desktop sidebar (`aside.layout-sidebar`): brand + caret collapse `Button` (`pi-angle-left`/`right`), then `<AppMenu />`. Collapsed = icons only (`.layout-collapsed`); hover expands it as an overlay.
@@ -67,8 +67,7 @@ Every `DataTable` also has `striped-rows` (no `show-gridlines`). Owner-tinted ro
 - `AppMenu.vue`: PrimeVue `Menu` with the router `#item` slot. `Menu` renders a fragment root, so it's styled via a wrapper `<nav class="app-menu">` + `:deep()`. Active route uses `--p-highlight-*` and `aria-current="page"`.
 
 ### DatePicker Notes
-- `size="small"` works via the `BaseInput` mixin forwarding to the inner `InputText` (adds `p-inputtext-sm` class)
-- Always use `icon-display="input"` with `show-icon` — the default `iconDisplay="button"` renders a separate `<button>` whose height doesn't match the small input
+- Always use `icon-display="input"` with `show-icon` — the default `iconDisplay="button"` renders a separate `<button>` whose height doesn't match the input
 - For month/year-only pickers: `view="month"` + `date-format="MM yy"`
 
 ### CSS Utilities (`src/assets/main.css`)
@@ -79,7 +78,7 @@ Defined utilities (Tailwind-named):
 `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-muted-color`
 
 Also defined: `.p-select-label { line-height: normal; }` — fixes Select height inflation caused by body line-height inheritance.
-`body` typography comes from `--p-typography-font-size` / `-font-weight` / `-line-height` (font family: Lato, loaded in `index.html`).
+`body` uses Inter (same as primevue.dev, loaded in `index.html`) with Lara's `--p-typography-font-size` (0.875rem) / `-font-weight` / `-line-height` (1.5), so plain text (e.g. `.summary-grid`) matches PrimeVue components. Never set `body` to `1rem`.
 
 Before using a Tailwind class in a template, verify it is in `main.css`. If it isn't, add it.
 
@@ -108,8 +107,8 @@ Every page is built from PrimeVue `Card`s. The page title is the first Card's `#
 - DataTable row counts go in `#footer` slot: `<template #footer><span class="text-muted-color text-sm">{{ items.length }} total</span></template>`
 - Paginator counts (Bills page) go in `#paginatorstart` with a hidden mirror in `#paginatorend` to keep pagination centered
 - Empty states: `.empty-state` with `.pi` icon, `.empty-state-title`, and description text referencing the toolbar
-- Badges/labels: PrimeVue `Tag` (e.g. the settlement "X owes Y" line), not custom badge CSS
-- Dialogs: `modal`, `:draggable="false"`, `style="width: 22rem"` (or wider as needed), all inner form elements `size="small"`
+- Badges/labels: PrimeVue `Tag`, not custom badge CSS. Sentence-style status lines (e.g. the settlement "X owes Y" line) use `Message` (body-size text); `Tag` is Lara's small 0.75rem badge
+- Dialogs: `modal`, `:draggable="false"`, `style="width: 22rem"` (or wider as needed)
 - Row hover + click-to-edit on DataTables: `row-hover`, `style="cursor: pointer"`, `@row-click="handler($event.data)"`. Delete button uses `@click.stop` to prevent row-click firing.
 
 ### New Bill Pre-population
@@ -165,3 +164,6 @@ Sidebar nav items are defined in `src/components/AppMenu.vue` (`items` array, `r
 - **App shell**: sidebar holds brand + caret collapse (icons-only mode, hover to peek); topbar right of sidebar; `AppMenu` (PrimeVue `Menu`), `Drawer` on mobile, PrimeVue `Button`s instead of custom controls.
 - **Pages**: all `.card` divs → PrimeVue `Card` with `#title`; Bills title moved out of its Toolbar; Search results total in `#subtitle`; settlement badge → `Tag`; Search filter list uses `--p-list-option-*` tokens.
 - **Tables**: Lara default headers, `striped-rows` on every DataTable, no gridlines.
+
+### 2026-11-19
+- **Match primevue.dev sizing**: removed every `size="small"` (66 components) so inputs, buttons and tables use Lara's default size. Font Lato → Inter; `body` keeps Lara's `--p-typography-*` tokens (0.875rem). `.summary-grid` uses the default `--p-datatable-body-cell-padding`.
