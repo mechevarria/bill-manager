@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/mechevarria/bill-manager/compare/v1.2.0...v1.2.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* font was too small and not in line with Lara them defaults ([ab07eb4](https://github.com/mechevarria/bill-manager/commit/ab07eb4b0f9b2effde191fea5973f87c57a350ac))
+
 ## [1.2.0](https://github.com/mechevarria/bill-manager/compare/v1.1.1...v1.2.0) (2026-11-09)
 
 
