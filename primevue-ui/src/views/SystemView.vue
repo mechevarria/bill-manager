@@ -115,16 +115,15 @@ async function saveDefaults() {
       <Toolbar>
         <template #start>
           <div class="flex items-center gap-2">
-            <Button label="Add Owner" icon="pi pi-plus" outlined size="small" :disabled="!store.defaults" @click="addOwner" />
-            <Button label="Add Income" icon="pi pi-plus" outlined size="small" :disabled="!store.defaults" @click="addDefaultIncome" />
-            <Button label="Add Expense" icon="pi pi-plus" outlined size="small" :disabled="!store.defaults" @click="addDefaultExpense" />
+            <Button label="Add Owner" icon="pi pi-plus" outlined :disabled="!store.defaults" @click="addOwner" />
+            <Button label="Add Income" icon="pi pi-plus" outlined :disabled="!store.defaults" @click="addDefaultIncome" />
+            <Button label="Add Expense" icon="pi pi-plus" outlined :disabled="!store.defaults" @click="addDefaultExpense" />
           </div>
         </template>
         <template #end>
           <Button
             label="Save"
             icon="pi pi-check"
-            size="small"
             :loading="saving"
             :disabled="!store.defaults"
             @click="saveDefaults"
@@ -142,7 +141,7 @@ async function saveDefaults() {
   <Card v-if="store.defaults" class="mb-4">
     <template #title>Owners ({{ store.defaults.owners.length }})</template>
     <template #content>
-      <DataTable :value="store.defaults.owners" data-key="id" size="small" striped-rows :row-style="ownerRowStyleFor">
+      <DataTable :value="store.defaults.owners" data-key="id" striped-rows :row-style="ownerRowStyleFor">
         <template #empty>
           <div class="empty-state">
             <i class="pi pi-users" />
@@ -152,12 +151,12 @@ async function saveDefaults() {
         </template>
         <Column header="Name (key)" style="width: 12rem">
           <template #body="{ data }">
-            <InputText v-model="data.name" size="small" fluid />
+            <InputText v-model="data.name" fluid />
           </template>
         </Column>
         <Column header="Display label">
           <template #body="{ data }">
-            <InputText v-model="data.label" size="small" fluid />
+            <InputText v-model="data.label" fluid />
           </template>
         </Column>
         <Column header="Color" style="width: 12rem">
@@ -167,7 +166,6 @@ async function saveDefaults() {
               :options="colorOptions"
               option-label="label"
               option-value="value"
-              size="small"
               fluid
             >
               <template #value="slotProps">
@@ -190,7 +188,6 @@ async function saveDefaults() {
           <template #body="{ data }">
             <Button
               icon="pi pi-trash"
-              size="small"
               severity="danger"
               outlined
               rounded
@@ -207,7 +204,7 @@ async function saveDefaults() {
   <Card v-if="store.defaults" class="mb-4">
     <template #title>Default Income ({{ store.defaults.incomes.length }})</template>
     <template #content>
-      <DataTable :value="store.defaults.incomes" data-key="id" size="small" striped-rows :row-style="defaultIncomeRowStyle">
+      <DataTable :value="store.defaults.incomes" data-key="id" striped-rows :row-style="defaultIncomeRowStyle">
         <template #empty>
           <div class="empty-state">
             <i class="pi pi-wallet" />
@@ -222,14 +219,13 @@ async function saveDefaults() {
               :options="ownerNameOptions(store.defaults)"
               option-label="label"
               option-value="value"
-              size="small"
               fluid
             />
           </template>
         </Column>
         <Column header="Description">
           <template #body="{ data }">
-            <InputText v-model="data.description" size="small" fluid />
+            <InputText v-model="data.description" fluid />
           </template>
         </Column>
         <Column header="Amount" style="width: 12rem">
@@ -239,7 +235,6 @@ async function saveDefaults() {
               mode="currency"
               currency="USD"
               :min-fraction-digits="2"
-              size="small"
               fluid
             />
           </template>
@@ -248,7 +243,6 @@ async function saveDefaults() {
           <template #body="{ data }">
             <Button
               icon="pi pi-trash"
-              size="small"
               severity="danger"
               outlined
               rounded
@@ -265,7 +259,7 @@ async function saveDefaults() {
   <Card v-if="store.defaults" class="mb-4">
     <template #title>Default Expenses ({{ store.defaults.expenses.length }})</template>
     <template #content>
-      <DataTable :value="store.defaults.expenses" data-key="id" size="small" striped-rows :row-style="defaultExpenseRowStyle">
+      <DataTable :value="store.defaults.expenses" data-key="id" striped-rows :row-style="defaultExpenseRowStyle">
         <template #empty>
           <div class="empty-state">
             <i class="pi pi-receipt" />
@@ -275,7 +269,7 @@ async function saveDefaults() {
         </template>
         <Column header="Name">
           <template #body="{ data }">
-            <InputText v-model="data.name" size="small" fluid />
+            <InputText v-model="data.name" fluid />
           </template>
         </Column>
         <Column header="Paid by" style="width: 12rem">
@@ -285,7 +279,6 @@ async function saveDefaults() {
               :options="ownerNameOptions(store.defaults)"
               option-label="label"
               option-value="value"
-              size="small"
               fluid
             />
           </template>
@@ -297,7 +290,6 @@ async function saveDefaults() {
               mode="currency"
               currency="USD"
               :min-fraction-digits="2"
-              size="small"
               fluid
             />
           </template>
@@ -311,7 +303,6 @@ async function saveDefaults() {
           <template #body="{ data }">
             <Button
               icon="pi pi-trash"
-              size="small"
               severity="danger"
               outlined
               rounded

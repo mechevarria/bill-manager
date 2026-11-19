@@ -161,7 +161,7 @@ async function doErase() {
       <Toolbar>
         <template #start>
           <div class="flex items-center gap-2">
-            <Button label="Export" icon="pi pi-download" outlined size="small" @click="doExport" />
+            <Button label="Export" icon="pi pi-download" outlined @click="doExport" />
             <FileUpload
               mode="basic"
               accept="application/json,.json"
@@ -169,13 +169,13 @@ async function doErase() {
               choose-label="Import"
               choose-icon="pi pi-upload"
               custom-upload
-              :choose-button-props="{ size: 'small', outlined: true }"
+              :choose-button-props="{ outlined: true }"
               @select="onImportFileSelect"
             />
           </div>
         </template>
         <template #end>
-          <Button label="Erase All" icon="pi pi-trash" severity="danger" size="small" @click="confirmErase" />
+          <Button label="Erase All" icon="pi pi-trash" severity="danger" @click="confirmErase" />
         </template>
       </Toolbar>
       <p class="text-muted-color text-sm mt-4">
@@ -192,11 +192,10 @@ async function doErase() {
     </div>
     <ProgressBar :value="exportTotal ? Math.round((exportProcessed / exportTotal) * 100) : 0" />
     <template #footer>
-      <Button label="Cancel" severity="secondary" text size="small" @click="exportOpen = false" />
+      <Button label="Cancel" severity="secondary" text @click="exportOpen = false" />
       <Button
         label="Download"
         icon="pi pi-download"
-        size="small"
         :disabled="!exportBlobUrl"
         @click="downloadExport"
       />
@@ -213,11 +212,10 @@ async function doErase() {
     </div>
     <ProgressBar :value="importTotal ? Math.round((importProcessed / importTotal) * 100) : 0" />
     <template #footer>
-      <Button label="Cancel" severity="secondary" text size="small" :disabled="importing" @click="importOpen = false" />
+      <Button label="Cancel" severity="secondary" text :disabled="importing" @click="importOpen = false" />
       <Button
         label="Process"
         icon="pi pi-play"
-        size="small"
         :loading="importing"
         :disabled="!importData"
         @click="runImport"

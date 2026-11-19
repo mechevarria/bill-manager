@@ -134,14 +134,14 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
             choose-label="Import CSV"
             choose-icon="pi pi-upload"
             custom-upload
-            :choose-button-props="{ size: 'small', outlined: true }"
+            :choose-button-props="{ outlined: true }"
             @select="onCsvSelect"
           />
-          <Button label="Add" icon="pi pi-plus" outlined size="small" @click="addDetail" />
+          <Button label="Add" icon="pi pi-plus" outlined @click="addDetail" />
         </div>
       </template>
       <template #end>
-        <Button label="Clear All" icon="pi pi-trash" severity="danger" outlined size="small" @click="clearAll" />
+        <Button label="Clear All" icon="pi pi-trash" severity="danger" outlined @click="clearAll" />
       </template>
     </Toolbar>
 
@@ -154,7 +154,6 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
       :rows="100"
       :rows-per-page-options="[25, 50, 100]"
       striped-rows
-      size="small"
       :row-style="detailRowStyle"
     >
       <template #footer>
@@ -169,22 +168,22 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
       </template>
       <Column field="date" header="Date" style="width: 8rem" sortable>
         <template #body="{ data }">
-          <InputText v-model="data.date" placeholder="MM/DD/YYYY" size="small" fluid />
+          <InputText v-model="data.date" placeholder="MM/DD/YYYY" fluid />
         </template>
       </Column>
       <Column field="type" header="Type" sortable>
         <template #body="{ data }">
-          <InputText v-model="data.type" size="small" fluid />
+          <InputText v-model="data.type" fluid />
         </template>
       </Column>
       <Column field="description" header="Description" sortable>
         <template #body="{ data }">
-          <InputText v-model="data.description" size="small" fluid />
+          <InputText v-model="data.description" fluid />
         </template>
       </Column>
       <Column field="amount" header="Amount" style="width: 10rem" sortable>
         <template #body="{ data }">
-          <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" size="small" fluid />
+          <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" fluid />
         </template>
       </Column>
       <Column field="personal" header="Personal" style="width: 9rem" sortable>
@@ -196,7 +195,6 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
             option-value="value"
             placeholder="—"
             show-clear
-            size="small"
             fluid
           />
         </template>
@@ -205,7 +203,6 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
         <template #body="{ index }">
           <Button
             icon="pi pi-times"
-            size="small"
             severity="danger"
             outlined
             rounded
@@ -217,8 +214,8 @@ async function onCsvSelect(event: FileUploadSelectEvent) {
     </DataTable>
 
     <template #footer>
-      <Button label="Cancel" severity="secondary" text size="small" @click="close(false)" />
-      <Button label="Apply" icon="pi pi-check" size="small" @click="close(true)" />
+      <Button label="Cancel" severity="secondary" text @click="close(false)" />
+      <Button label="Apply" icon="pi pi-check" @click="close(true)" />
     </template>
   </Dialog>
 </template>

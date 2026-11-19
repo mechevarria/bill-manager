@@ -153,13 +153,11 @@ function amountClass(value: number | null | undefined, category: string): string
                 :options="operatorOptions"
                 option-label="label"
                 option-value="value"
-                size="small"
                 style="min-width: 12rem"
               />
               <InputText
                 v-model="queryInput"
                 placeholder="Search terms…"
-                size="small"
                 style="min-width: 16rem"
               />
             </div>
@@ -169,7 +167,6 @@ function amountClass(value: number | null | undefined, category: string): string
               type="submit"
               label="Search"
               icon="pi pi-search"
-              size="small"
               :loading="loading"
               :disabled="queryInput.trim().length < 2"
             />
@@ -186,7 +183,7 @@ function amountClass(value: number | null | undefined, category: string): string
           removable
           @remove="removeParam(i)"
         />
-        <Button label="Clear all" severity="secondary" text size="small" @click="clearAll" />
+        <Button label="Clear all" severity="secondary" text @click="clearAll" />
       </div>
 
       <div v-else-if="!result && !loading" class="empty-state">
@@ -269,7 +266,6 @@ function amountClass(value: number | null | undefined, category: string): string
           :rows-per-page-options="[25, 50, 100]"
           striped-rows
           sortable
-          size="small"
         >
           <template #empty>
             <div class="empty-state">

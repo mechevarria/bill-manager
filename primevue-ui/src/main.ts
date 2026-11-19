@@ -13,9 +13,18 @@ import App from './App.vue'
 import router from './router'
 
 // Lara with its built-in cyan palette as the primary color.
+// DataTable header cells sit on the card background (no tinted header row),
+// matching the primevue.dev tables.
 const LaraCyan = definePreset(Lara, {
   semantic: {
     primary: palette('{cyan}'),
+  },
+  components: {
+    datatable: {
+      headerCell: {
+        background: '{content.background}',
+      },
+    },
   },
 })
 

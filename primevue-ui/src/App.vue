@@ -30,7 +30,6 @@ const mobileMenuOpen = ref(false)
           severity="secondary"
           text
           rounded
-          size="small"
           @click="collapsed = !collapsed"
         />
       </div>

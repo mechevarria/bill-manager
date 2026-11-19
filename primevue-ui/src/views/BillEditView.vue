@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Card from 'primevue/card'
-import Tag from 'primevue/tag'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Tooltip from 'primevue/tooltip'
 
@@ -375,15 +374,15 @@ function fmt(value: number | null | undefined): string {
       <Toolbar>
         <template #start>
           <div class="flex items-center gap-2">
-            <Button label="Add Income" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addIncome" />
-            <Button label="Add Expense" icon="pi pi-plus" outlined size="small" :disabled="!bill" @click="addExpense" />
-            <Button label="Calculate" icon="pi pi-calculator" outlined size="small" :disabled="!bill" @click="calculate" />
+            <Button label="Add Income" icon="pi pi-plus" outlined :disabled="!bill" @click="addIncome" />
+            <Button label="Add Expense" icon="pi pi-plus" outlined :disabled="!bill" @click="addExpense" />
+            <Button label="Calculate" icon="pi pi-calculator" outlined :disabled="!bill" @click="calculate" />
           </div>
         </template>
         <template #end>
           <div class="flex items-center gap-2">
-            <Button label="Back" icon="pi pi-arrow-left" severity="secondary" text size="small" @click="cancel" />
-            <Button label="Save" icon="pi pi-check" :loading="saving" :disabled="!bill" size="small" @click="save" />
+            <Button label="Back" icon="pi pi-arrow-left" severity="secondary" text @click="cancel" />
+            <Button label="Save" icon="pi pi-check" :loading="saving" :disabled="!bill" @click="save" />
           </div>
         </template>
       </Toolbar>
@@ -417,7 +416,7 @@ function fmt(value: number | null | undefined): string {
             <div>Click <b>Calculate</b> in the toolbar to run.</div>
           </div>
           <template v-else>
-            <Tag :value="summaryResult.settlement" severity="secondary" class="mb-4" />
+            <Message severity="secondary" icon="pi pi-arrow-right-arrow-left" :closable="false" class="mb-4">{{ summaryResult.settlement }}</Message>
             <table class="summary-grid">
               <thead>
                 <tr>
@@ -562,7 +561,7 @@ function fmt(value: number | null | undefined): string {
     <Card id="income-section" class="mb-4">
       <template #title>Income</template>
       <template #content>
-        <DataTable :value="bill.incomes" data-key="id" size="small" striped-rows :row-style="incomeRowStyle">
+        <DataTable :value="bill.incomes" data-key="id" striped-rows :row-style="incomeRowStyle">
           <template #footer>
             <span class="text-muted-color text-sm">{{ bill.incomes.length }} total &mdash; {{ fmt(bill.incomes.reduce((s, i) => s + (i.amount ?? 0), 0)) }}</span>
           </template>
@@ -575,22 +574,22 @@ function fmt(value: number | null | undefined): string {
           </template>
           <Column header="Owner" style="width: 12rem">
             <template #body="{ data }">
-              <Select v-model="data.owner" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
+              <Select v-model="data.owner" :options="ownerOptions" option-label="label" option-value="value" fluid />
             </template>
           </Column>
           <Column header="Description">
             <template #body="{ data }">
-              <InputText v-model="data.description" size="small" fluid />
+              <InputText v-model="data.description" fluid />
             </template>
           </Column>
           <Column header="Amount" style="width: 12rem">
             <template #body="{ data }">
-              <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" size="small" fluid />
+              <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" fluid />
             </template>
           </Column>
           <Column header="" style="width: 4rem">
             <template #body="{ data }">
-              <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete income" @click="confirmDeleteIncome(data)" />
+              <Button icon="pi pi-trash" severity="danger" outlined rounded aria-label="Delete income" @click="confirmDeleteIncome(data)" />
             </template>
           </Column>
         </DataTable>
@@ -601,7 +600,7 @@ function fmt(value: number | null | undefined): string {
     <Card id="expense-section" class="mb-4">
       <template #title>Expense</template>
       <template #content>
-        <DataTable :value="bill.expenses" data-key="id" size="small" striped-rows :row-style="expenseRowStyle">
+        <DataTable :value="bill.expenses" data-key="id" striped-rows :row-style="expenseRowStyle">
           <template #footer>
             <span class="text-muted-color text-sm">{{ bill.expenses.length }} total &mdash; {{ fmt(bill.expenses.reduce((s, e) => s + (e.amount ?? 0), 0)) }}</span>
           </template>
@@ -614,17 +613,17 @@ function fmt(value: number | null | undefined): string {
           </template>
           <Column header="Name">
             <template #body="{ data }">
-              <InputText v-model="data.name" size="small" fluid />
+              <InputText v-model="data.name" fluid />
             </template>
           </Column>
           <Column header="Paid by" style="width: 12rem">
             <template #body="{ data }">
-              <Select v-model="data.paid" :options="ownerOptions" option-label="label" option-value="value" size="small" fluid />
+              <Select v-model="data.paid" :options="ownerOptions" option-label="label" option-value="value" fluid />
             </template>
           </Column>
           <Column header="Amount" style="width: 12rem">
             <template #body="{ data }">
-              <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" :disabled="data.hasDetails" size="small" fluid />
+              <InputNumber v-model="data.amount" mode="currency" currency="USD" :min-fraction-digits="2" :disabled="data.hasDetails" fluid />
             </template>
           </Column>
           <Column header="Details" style="width: 14rem">
@@ -635,7 +634,6 @@ function fmt(value: number | null | undefined): string {
                   v-if="data.hasDetails"
                   icon="pi pi-list"
                   severity="secondary"
-                  size="small"
                   :label="`${(data.details || []).length}`"
                   @click="openDetails(data)"
                 />
@@ -644,7 +642,7 @@ function fmt(value: number | null | undefined): string {
           </Column>
           <Column header="" style="width: 4rem">
             <template #body="{ data }">
-              <Button icon="pi pi-trash" size="small" severity="danger" outlined rounded aria-label="Delete expense" @click="confirmDeleteExpense(data)" />
+              <Button icon="pi pi-trash" severity="danger" outlined rounded aria-label="Delete expense" @click="confirmDeleteExpense(data)" />
             </template>
           </Column>
         </DataTable>
@@ -678,10 +676,10 @@ function fmt(value: number | null | undefined): string {
   width: 100%;
   border-collapse: collapse;
 }
-/* Mirrors a small striped DataTable, using its theme tokens */
+/* Mirrors a striped DataTable, using its theme tokens */
 .summary-grid th,
 .summary-grid td {
-  padding: var(--p-datatable-body-cell-sm-padding);
+  padding: var(--p-datatable-body-cell-padding);
   text-align: right;
   border-bottom: 1px solid var(--p-datatable-body-cell-border-color);
 }

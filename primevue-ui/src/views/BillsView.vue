@@ -183,7 +183,7 @@ async function confirmAddBill() {
     <template #content>
       <Toolbar class="mb-4">
         <template #end>
-          <Button label="New" icon="pi pi-plus" size="small" @click="addBill" />
+          <Button label="New" icon="pi pi-plus" @click="addBill" />
         </template>
       </Toolbar>
 
@@ -192,7 +192,7 @@ async function confirmAddBill() {
       <DataTable
         v-if="loading && rows.length === 0 && !error"
         :value="skeletonRows"
-        size="small" striped-rows
+ striped-rows
       >
         <Column header="Month"><template #body><Skeleton /></template></Column>
         <Column header="Year"><template #body><Skeleton /></template></Column>
@@ -210,7 +210,7 @@ async function confirmAddBill() {
         v-else-if="!error"
         :value="rows"
         data-key="id"
-        size="small" striped-rows
+ striped-rows
         lazy
         row-hover
         :paginator="true"
@@ -272,7 +272,6 @@ async function confirmAddBill() {
           <template #body="{ data }">
             <Button
               icon="pi pi-trash"
-              size="small"
               outlined
               rounded
               severity="danger"
@@ -301,7 +300,6 @@ async function confirmAddBill() {
         date-format="MM yy"
         :show-icon="true"
         icon-display="input"
-        size="small"
         fluid
       />
     </div>
@@ -310,13 +308,11 @@ async function confirmAddBill() {
         label="Cancel"
         severity="secondary"
         outlined
-        size="small"
         @click="newBillDialogVisible = false"
       />
       <Button
         label="Create"
         icon="pi pi-check"
-        size="small"
         :disabled="!newBillDate"
         :loading="newBillSubmitting"
         @click="confirmAddBill"

@@ -209,7 +209,6 @@ watch(
             :options="yearOptions"
             option-label="label"
             option-value="value"
-            size="small"
             style="min-width: 8rem"
           />
         </template>

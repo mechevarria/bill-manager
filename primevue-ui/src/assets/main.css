@@ -17,7 +17,9 @@ body,
 body {
   background: var(--p-surface-50);
   color: var(--p-text-color);
-  font-family: 'Lato', sans-serif;
+  /* Inter = primevue.dev's font. Size/weight/line-height are Lara's typography
+     tokens, so plain text matches what PrimeVue components render. */
+  font-family: 'Inter', sans-serif;
   font-size: var(--p-typography-font-size);
   font-weight: var(--p-typography-font-weight);
   line-height: var(--p-typography-line-height);
